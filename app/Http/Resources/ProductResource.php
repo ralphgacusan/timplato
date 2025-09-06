@@ -22,9 +22,7 @@ class ProductResource extends JsonResource
             'stock_quantity' => $this->stock_quantity,
             'restock_level' => $this->restock_level,
             'category' => new CategoryResource($this->whenLoaded('category')), // optional
-            'images' => new ProductImageResource($this->whenLoaded('image')), // optional
-            // 'images' => ProductImageResource::collection($this->whenLoaded('images')), // optional --------- TO FIX, IMAGES NOT RETURNED ON products->index()
-
+            'images' => ProductImageResource::collection($this->whenLoaded('images')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

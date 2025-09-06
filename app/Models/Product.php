@@ -45,4 +45,10 @@ class Product extends Model
     {
         return $this->hasOne(ProductImage::class, 'product_id', 'product_id')->where('is_primary', true);
     }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class, 'product_id', 'product_id');
+    }
+
 }

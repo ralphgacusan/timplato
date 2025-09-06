@@ -1,0 +1,245 @@
+body {
+    background: #f2f4f8;
+    color: #333;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Product Container */
+.product-page-container {
+    display: flex;
+    gap: 48px;
+    max-width: 1200px;
+    margin: 100px auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    padding: 40px 32px;
+    margin-top: 160px !important;
+}
+
+/* Image Section */
+.product-image-section {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main-product-image-container {
+    width: 100%;
+    border-radius: 12px;
+    background: #f0f0f0;
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.main-product-image {
+    width: 100%;
+    max-width: 420px;
+    height: 340px;
+    object-fit: contain;
+}
+
+.product-image-slider {
+    display: flex;
+    gap: 12px;
+}
+
+.slider-thumb {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid #ccc;
+    cursor: pointer;
+    transition: border 0.2s;
+    background: #f4f6fb;
+}
+
+.slider-thumb.selected {
+    border: 2px solid #7c5fe6;
+}
+
+/* Details Section */
+.product-details-section {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.product-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.product-brand {
+    font-weight: 600;
+    color: #648DE5;
+    margin-bottom: 6px;
+}
+
+.product-rating {
+    color: #F4AE71;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+}
+
+.product-price {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+/* Quantity */
+.quantity-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.quantity-btn {
+    background: #648DE5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.quantity-btn:hover {
+    background: #4b73c0;
+}
+
+.quantity-value {
+    font-size: 1.3rem;
+    min-width: 36px;
+    text-align: center;
+}
+
+/* Buttons */
+.product-buttons {
+    display: flex;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.buy-btn {
+    flex: 1;
+    background: #648DE5;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.buy-btn:hover {
+    background: #4b73c0;
+}
+
+.add-cart-btn {
+    width: 280px;
+    font-size: 1.2rem;
+    height: 50px;
+    background: #9EB7E5;
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    padding: 0;
+    color: white;
+}
+
+.add-cart-btn:hover {
+    background: #7da1d1;
+}
+
+.add-cart-btn svg {
+    stroke: #fff;
+    width: 22px;
+    height: 22px;
+}
+
+/* Stock Info */
+.product-stock {
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.stock-status.in-stock {
+    color: #28a745;
+    /* Green */
+    font-weight: bold;
+}
+
+.stock-status.out-of-stock {
+    color: #dc3545;
+    /* Red */
+    font-weight: bold;
+}
+
+/* Product Description */
+.product-description {
+    margin-bottom: 20px;
+}
+
+.product-description h4 {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+    color: #304C89;
+}
+
+.product-description p {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+/* Reviews Section */
+.reviews-section {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 32px;
+}
+
+.reviews-section h3 {
+    font-size: 1.8rem;
+    color: #304C89;
+    margin-bottom: 16px;
+}
+
+.review-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.review-header {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #304C89;
+}
+
+.review-body {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}

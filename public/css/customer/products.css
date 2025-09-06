@@ -1,0 +1,205 @@
+body {
+    background: #f2f4f8;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.main-content {
+    margin-top: 170px;
+    padding: 0 180px;
+}
+
+/* Product Search Bar */
+.product-search-bar {
+    display: flex;
+    gap: 16px;
+    margin: 32px 0 24px 0;
+}
+
+/* Adjust widths individually */
+.product-search-bar input {
+    flex: 3;
+    /* longer input */
+}
+
+.product-search-bar select {
+    flex: 1;
+    /* shorter dropdowns */
+}
+
+
+.product-search-bar input,
+.product-search-bar select {
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    background: #fff;
+    font-size: 1rem;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+.product-search-bar input:focus,
+.product-search-bar select:focus {
+    border-color: #4b73c0;
+    box-shadow: 0 0 6px rgba(95, 151, 230, 0.3);
+}
+
+.product-search-bar button {
+    flex: 1.2;
+    /* slightly longer button */
+    padding: 10px 24px;
+    border-radius: 10px;
+    border: none;
+    background: #648DE5;
+    /* primary color */
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.product-search-bar button:hover {
+    background: #4b73c0;
+}
+
+/* Product Cards Container */
+.products-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 24px;
+    padding-top: 30px !important;
+    margin-bottom: 50px;
+}
+
+/* Product Card */
+.product-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+}
+
+.product-card .product-image-container {
+    width: 100%;
+    height: 220px;
+    background: #f0f0f0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.product-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.product-card .product-title,
+.product-card .product-price {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-align: left;
+    width: 100%;
+    color: #333;
+    /* same color for price and title */
+}
+
+.product-card .product-price {
+    margin-bottom: 16px;
+    font-weight: 300 !important;
+    font-size: 1.0rem !important;
+}
+
+
+/* Product Card Buttons Container */
+.product-card .product-buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+/* Buy Now Button */
+.product-card .buy-btn {
+    flex: 1;
+    padding: 10px 0;
+    /* shorter height */
+    background: #648DE5;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.product-card .buy-btn:hover {
+    background: #4b73c0;
+}
+
+/* Add to Cart Button (square with icon only) */
+.product-card .add-cart-btn {
+    width: 48px;
+    /* square */
+    height: 48px;
+    /* square */
+    background: #9EB7E5;
+    border: none;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    padding: 0;
+}
+
+.product-card .add-cart-btn:hover {
+    background: #7da1d1;
+}
+
+/* Add to Cart Button (square with icon only) */
+.product-card .add-cart-btn i {
+    stroke-width: 2;
+    stroke: #fff;
+    /* Lucide icon color white */
+    width: 20px;
+    height: 20px;
+}
+
+.add-cart-btn svg {
+    stroke: #fff !important;
+    /* force white */
+    width: 20px;
+    height: 20px;
+}
+
+.link {
+
+    text-decoration: none;
+    /* Removes the underline */
+    color: inherit;
+    /* Inherits color from parent element */
+    cursor: pointer;
+    /* Optional: make it look clickable */
+
+}
