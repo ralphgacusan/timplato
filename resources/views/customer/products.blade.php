@@ -8,22 +8,44 @@
 
     <div class="main-content">
         <!-- Product Search Bar -->
+        <!-- Product Search Bar -->
         <div class="product-search-bar">
-            <input type="text" id="searchInput" placeholder="Search">
-            <select id="categorySelect">
-                <option value="">Category</option>
-                @foreach (\App\Models\Category::all() as $category)
-                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                @endforeach
-            </select>
-            <select id="orderSelect">
-                <option value="">Sort by</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="name">Name</option>
-            </select>
-            <button onclick="filterProducts()">Search</button>
+            <form action="{{ route('customer.filter-products') }}" method="GET"
+                style="display: flex; width: 100%; gap: 16px;">
+                <input type="text" name="search" placeholder="Search" value="{{ request('search') }}">
+
+                <select name="category">
+                    <option value="" {{ old('category', request('category')) === '' ? 'selected' : '' }}>Category
+                    </option>
+                    @foreach (\App\Models\Category::all() as $category)
+                        <option value="{{ $category->category_id }}"
+                            {{ (string) old('category', request('category')) === (string) $category->category_id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+
+
+
+
+
+                <select name="sort">
+                    <option value="">Sort by</option>
+                    <option value="price-asc" {{ request('sort') == 'price-asc' ? 'selected' : '' }}>Price: Low to High
+                    </option>
+                    <option value="price-desc" {{ request('sort') == 'price-desc' ? 'selected' : '' }}>Price: High to
+                        Low</option>
+                    <option value="date-desc" {{ request('sort') == 'date-desc' ? 'selected' : '' }}>Newest First
+                    </option>
+                    <option value="date-asc" {{ request('sort') == 'date-asc' ? 'selected' : '' }}>Oldest First
+                    </option>
+                </select>
+
+                <button type="submit">Search</button>
+            </form>
         </div>
+
 
         <!-- Product Cards Container -->
         <div class="products-container" id="productsContainer">
@@ -41,8 +63,22 @@
                             <div class="product-title">{{ $product->name }}</div>
                             <div class="product-price">₱{{ number_format($product->price, 2) }}</div>
                             <div class="product-buttons">
-                                <button class="buy-btn">Buy Now</button>
-                                <button class="add-cart-btn"><i data-lucide="shopping-cart"></i></button>
+                                <!-- Buy Now Form -->
+                                <form action="{{ route('customer.checkout.buyNow', $product) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="buy-btn">Buy Now</button>
+                                </form>
+                                <!-- Add to Cart Form -->
+                                <form action="{{ route('customer.add-to-cart', $product) }}" method="POST">
+                                    @csrf
+                                    <!-- Hidden default quantity -->
+                                    <input type="hidden" name="quantity" value="1">
+
+                                    <button type="submit" class="add-cart-btn">
+                                        <i data-lucide="shopping-cart"></i>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </a>

@@ -1,0 +1,122 @@
+<?php
+
+namespace App\Http\Controllers\Web;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Cart;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
+
+class OrderController extends Controller
+{
+    // Checkout page for full cart
+    public function checkoutCart()
+    {
+        $user = Auth::user();
+        $cart = Cart::with('items.product.primaryImage')->where('user_id', $user->id)->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return redirect()->route('customer.cart')->with('error', 'Your cart is empty.');
+        }
+
+        return view('customer.checkout', ['items' => $cart->items]);
+    }
+
+    // Checkout page for single product (Buy Now)
+    public function checkoutBuyNow(Request $request, Product $product)
+    {
+        $quantity = $request->input('quantity', 1);
+
+        $items = collect([
+            (object)[
+                'product' => $product,
+                'quantity' => $quantity,
+                'subtotal' => $product->price * $quantity,
+            ]
+        ]);
+
+        return view('customer.checkout', ['items' => $items]);
+    }
+
+    // Place the order
+    public function placeOrder(Request $request)
+{
+    $request->validate([
+        'paymentMethod' => 'required|string',
+        'deliveryMethod' => 'required|string',
+        'items' => 'required|array',
+        'coupon' => 'nullable|string',
+    ]);
+
+    $user = Auth::user();
+    $items = collect($request->items);
+
+    $subtotal = $items->sum(fn($i) => $i['price'] * $i['quantity']);
+
+    // Delivery fee
+    $deliveryFees = [
+        'Premium Delivery' => 100,
+        'Named Day Delivery' => 150,
+        'Standard Delivery' => 0,
+    ];
+    $deliveryFee = $deliveryFees[$request->deliveryMethod] ?? 0;
+
+    // Voucher/discount logic
+    $discount;
+    $voucher = strtoupper($request->coupon ?? '');
+    if ($voucher === 'ALDEN50') {
+        $discount = 50;
+    } elseif ($voucher === 'DEENICE10') {
+        $discount = ($subtotal + $deliveryFee) * 0.10;
+    }
+
+    $totalAmount = $subtotal + $deliveryFee - $discount;
+
+    $order = Order::create([
+    'user_id' => $user->id,
+    'total_amount' => $totalAmount,
+    'current_status' => 'pending',
+    'payment_method' => $request->paymentMethod,
+    'discount_amount' => $discount,  // <-- changed from 'discount'
+    'voucher_code' => $voucher ?: null, // this is fine
+]);
+
+    foreach ($items as $item) {
+        OrderItem::create([
+            'order_id' => $order->order_id,
+            'product_id' => $item['product_id'],
+            'quantity' => $item['quantity'],
+            'price' => $item['price'],
+        ]);
+    }
+
+    if ($request->input('clear_cart')) {
+        Cart::where('user_id', $user->id)->first()?->items()->delete();
+    }
+
+    return redirect()->route('customer.home')->with('success', 'Order placed successfully!');
+}
+
+// Display Order Details
+public function showOrderDetails(Order $order)
+{
+    $user = Auth::user();
+
+    // Ensure the order belongs to the authenticated user
+    if ($order->user_id !== $user->id) {
+        abort(403, 'Unauthorized access to this order.');
+    }
+
+    // Load related items and product images
+    $order->load('items.product.primaryImage');
+
+    return view('customer.order-details', [
+        'order' => $order
+    ]);
+}
+
+
+}

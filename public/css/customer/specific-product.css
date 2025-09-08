@@ -40,7 +40,9 @@ body {
     width: 100%;
     max-width: 420px;
     height: 340px;
-    object-fit: contain;
+    object-fit: cover;
+    /* fills container, keeps square shape */
+    border-radius: 10px;
 }
 
 .product-image-slider {
@@ -132,8 +134,24 @@ body {
     margin-top: 20px;
 }
 
+.product-buttons form {
+    flex: 1;
+    /* Make both forms stretch equally */
+}
+
+.buy-btn,
+.add-cart-btn {
+    width: 100%;
+    /* Fill their form container */
+    height: 50px;
+    /* Consistent height */
+    font-size: 1.2rem;
+    border-radius: 12px;
+}
+
 .buy-btn {
     flex: 1;
+    width: 330px;
     background: #648DE5;
     color: #fff;
     border: none;
@@ -150,7 +168,7 @@ body {
 }
 
 .add-cart-btn {
-    width: 280px;
+    width: 330px;
     font-size: 1.2rem;
     height: 50px;
     background: #9EB7E5;

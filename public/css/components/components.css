@@ -1,0 +1,52 @@
+:root {
+    --primary: #AFCBFF;
+    --secondary: #F4AE71;
+    --accent: #F4AE71;
+    --bg: #B6C6E7;
+    --white: #fff;
+    --text: #2C3E50;
+    --border: #dbeafe;
+    --shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+    --danger: #FF4C4C;
+}
+
+/* Override Bootstrap default buttons */
+.btn-primary {
+    background-color: var(--primary) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+}
+
+.btn-primary:hover {
+    background-color: #92b8e0 !important;
+}
+
+.btn-warning {
+    background-color: var(--accent) !important;
+    color: var(--white) !important;
+    border: none !important;
+}
+
+.btn-warning:hover {
+    background-color: #e09e4c !important;
+}
+
+.btn-secondary {
+    background-color: var(--secondary) !important;
+    color: var(--white) !important;
+    border: none !important;
+}
+
+.btn-secondary:hover {
+    background-color: #e09e4c !important;
+}
+
+.btn-danger {
+    background-color: var(--danger) !important;
+    color: var(--white) !important;
+    border: none !important;
+}
+
+.btn-danger:hover {
+    background-color: #e03b3b !important;
+}

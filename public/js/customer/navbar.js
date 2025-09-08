@@ -70,3 +70,19 @@ if (searchToggle && searchBar) {
         }
     });
 }
+
+function showNotification(message, type = 'success', duration = 6000) {
+    const container = document.getElementById('notification-container');
+    const notif = document.createElement('div');
+    notif.className = `notification ${type}`;
+    notif.innerHTML = `
+                <span>${message}</span>
+                <span class="close-btn" onclick="this.parentElement.remove()">×</span>
+            `;
+
+    container.appendChild(notif);
+
+    setTimeout(() => {
+        notif.remove();
+    }, duration);
+}

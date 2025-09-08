@@ -17,41 +17,83 @@
 </head>
 
 <body>
-    <!-- Header with Navigation -->
-    {{-- Nav --}}
-    <div class="nav">
-        <img src="{{ asset('timplatoLogo/Timplato-White2.png') }}" alt="Timplato Logo" class="logo">
-        <ul>
-            <li class="search-nav-item" style="position:relative;">
-                <a href="#" id="searchToggle"><i data-lucide="search"></i></a>
-                <input type="text" id="navbarSearchBar" class="navbar-search-bar" placeholder="Search..." />
-            </li>
-            <li><a href="{{ route('customer.home') }}"><i data-lucide="house"></i></a></li>
-            <li><a href="#services"><i data-lucide="shopping-cart"></i></a></li>
-            <li class="dropdown-user" style="position:relative;">
-                <a href="#" id="userDropdownToggle"><i data-lucide="user"></i></a>
-                <ul id="userDropdownMenu">
-                    <li><a href="{{ route('auth.signin') }}">Login</a></li>
-                    <li><a href="{{ route('auth.signup') }}">Sign Up</a></li>
-                </ul>
-            </li>
-        </ul>
+    <div class="page-wrapper">
+        <!-- Header with Navigation -->
+        {{-- Nav --}}
+        <div class="nav">
+            <img src="{{ asset('timplatoLogo/Timplato-White2.png') }}" alt="Timplato Logo" class="logo">
+            <ul>
+                <li class="search-nav-item" style="position:relative;">
+                    <a href="#" id="searchToggle"><i data-lucide="search"></i></a>
+                    <input type="text" id="navbarSearchBar" class="navbar-search-bar" placeholder="Search..." />
+                </li>
+                <li><a href="{{ route('customer.home') }}"><i data-lucide="house"></i></a></li>
+                <li><a href="{{ route('customer.cart') }}"><i data-lucide="shopping-cart"></i></a></li>
+                {{-- User Dropdown --}}
+                <li class="dropdown-user" style="position:relative;">
+                    @guest
+                        <a href="#" id="userDropdownToggle"><i data-lucide="user"></i></a>
+                        <ul id="userDropdownMenu">
+                            <li><a href="{{ route('login') }}">Login</a></li>
+                            <li><a href="{{ route('auth.signup') }}">Sign Up</a></li>
+                        </ul>
+                    @endguest
+
+                    @auth
+                        <a href="#" id="userDropdownToggle">
+                            @if (Auth::user()->profile_picture ?? false)
+                                <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile"
+                                    class="profile-img" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">
+                            @else
+                                <i data-lucide="user"></i>
+                            @endif
+                        </a>
+                        <ul id="userDropdownMenu">
+                            <li><a href="{{ route('auth.user-profile', Auth::user()->id) }}">Profile</a></li>
+                            <li>
+                                <form action="{{ route('auth.logout') }}" method="POST" style="margin:0;">
+                                    @csrf
+                                    <button type="submit"
+                                        style="background:none;border:none;cursor:pointer;">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    @endauth
+                </li>
+            </ul>
+        </div>
+
+        <div id="notification-container"></div>
+
+        @if (session('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    showNotification(@json(session('success')), 'success');
+                });
+            </script>
+        @endif
+
+        @if (session('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    showNotification(@json(session('error')), 'error');
+                });
+            </script>
+        @endif
+
+        <main class="main-container">
+
+            {{ $slot }}
+
+        </main>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2023 Timplato. All rights reserved.</p>
+        </div>
     </div>
 
-
-    <main class="main-container">
-
-        {{ $slot }}
-
-    </main>
-
-    <!-- Footer -->
-    <div class="footer">
-        <p>&copy; 2023 Timplato. All rights reserved.</p>
-    </div>
-
-
-    <script src="../JS/navbar.js"></script>
+    <script src="{{ asset('js/customer/navbar.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>
@@ -59,6 +101,8 @@
     <script>
         lucide.createIcons();
     </script>
+
+
 </body>
 
 </html>

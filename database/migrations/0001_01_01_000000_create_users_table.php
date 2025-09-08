@@ -18,9 +18,13 @@ return new class extends Migration
             $table->string('email')->unique(); // Unique email login
             $table->string('password'); // Hashed password
             $table->string('phone')->nullable(); // Contact number
+            $table->string('profile_picture_path')->nullable(); // Profile picture (optional)
             $table->enum('role', ['user', 'admin']); // User role
+            $table->enum('gender', ['male', 'female', 'prefer_not_to_say']); // Gender           
+            $table->date('date_of_birth'); // Date of birth
             $table->timestamps(); // created_at and updated_at
         });
+
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

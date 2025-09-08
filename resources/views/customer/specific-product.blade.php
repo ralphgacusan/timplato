@@ -27,13 +27,14 @@
         <div class="product-details-section">
             <div class="product-title">{{ $product->name }}</div>
             <div class="product-brand">
-                {{ $product->category->name ?? 'No Category' }} &nbsp;|&nbsp; SKU: {{ $product->id }}
+                {{ $product->category->name ?? 'No Category' }} &nbsp;|&nbsp; ID: {{ $product->product_id }}
             </div>
             <div class="product-rating">&#9733;&#9733;&#9733;&#9733;&#189; &nbsp; 4.5 | 2017 Reviews</div>
             <div class="product-price">₱{{ number_format($product->price, 2) }}</div>
 
             <!-- Stock Info -->
             <div class="product-stock">
+                {{-- TO FIX DISPLAY SOLD FEAUTURE --}}
                 <span>Sold: {{ $product->sold_quantity ?? 0 }}</span> |
                 <span>Left: {{ $product->stock_quantity }}</span> |
                 <span class="stock-status {{ $product->stock_quantity > 0 ? 'in-stock' : 'out-of-stock' }}">
@@ -57,16 +58,23 @@
 
             <!-- Action Buttons -->
             <div class="product-buttons">
-                <button class="buy-btn">Buy Now</button>
-                <button class="add-cart-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#fff"
-                        stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M6 6h15l-1.68 8.39a2 2 0 0 1-1.97 1.61H8.65a2 2 0 0 1-1.97-1.61L5 6z" />
-                        <circle cx="9" cy="21" r="1" />
-                        <circle cx="20" cy="21" r="1" />
-                    </svg>
-                    <span>Add to Cart</span>
-                </button>
+                <!-- Buy Now Form -->
+                <form action="{{ route('customer.checkout.buyNow', $product) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="buy-btn">Buy Now</button>
+                </form>
+
+                <form action="{{ route('customer.add-to-cart', $product) }}" method="POST">
+                    @csrf
+                    <!-- Hidden default quantity -->
+                    <input type="hidden" id="quantityInput" name="quantity" value="1">
+
+                    <button type="submit" class="add-cart-btn">
+                        <i data-lucide="shopping-cart"></i> <span>Add to Cart</span>
+
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -96,13 +104,17 @@
             img.classList.add('selected');
         }
 
-        // Quantity
         let quantity = 1;
 
         function changeQuantity(val) {
             quantity += val;
             if (quantity < 1) quantity = 1;
+
+            // Update display
             document.getElementById('quantityValue').textContent = quantity;
+
+            // Update hidden input
+            document.getElementById('quantityInput').value = quantity;
         }
     </script>
 

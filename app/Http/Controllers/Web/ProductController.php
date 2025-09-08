@@ -36,6 +36,61 @@ class ProductController extends Controller
         return view('customer.specific-product', compact('product'));
     }
 
+    // Filter Products
+    public function filterProducts(Request $request) {
+        $query = Product::with(['category', 'images']);
+
+        // Search by name or description
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                ->orWhere('description', 'like', "%$search%");
+            });
+        }
+
+        // Filter by category
+        if ($request->filled('category')) {
+            $selectedCategory = Category::with('children')->find($request->input('category'));
+
+            if ($selectedCategory) {
+                $categoryIds = $selectedCategory->allChildrenIds();
+                $query->whereIn('category_id', $categoryIds);
+            }
+        }
+
+        // Sorting
+        if ($request->filled('sort')) {
+            switch ($request->input('sort')) {
+                case 'price-asc':
+                    $query->orderBy('price', 'asc');
+                    break;
+                case 'price-desc':
+                    $query->orderBy('price', 'desc');
+                    break;
+                case 'name':
+                    $query->orderBy('name', 'asc');
+                    break;
+                case 'date-asc': // Oldest first
+                    $query->orderBy('created_at', 'asc');
+                    break;
+                case 'date-desc': // Newest first
+                    $query->orderBy('created_at', 'desc');
+                    break;
+            }
+        } else {
+            // Default sort by newest
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $products = $query->get();
+
+        return view('customer.products', compact('products'));
+    }
+
+
+
+
     // // Show a specific product - TEST
     // public function specificProduct()
     // {

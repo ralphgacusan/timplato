@@ -207,6 +207,17 @@
     text-align: center;
 }
 
+.input-error {
+    position: absolute;
+    bottom: -2px;
+    /* Place it just below the input field */
+    left: 0;
+    color: red;
+    font-size: 0.75rem;
+    line-height: 1;
+    pointer-events: none;
+}
+
 /* Responsive for mobile */
 @media (max-width: 768px) {
     .formRow {

@@ -10,8 +10,7 @@ class Product extends Model
     use HasFactory;
 
     // Specify the primary key if not the default 'id'
-    protected $primaryKey = 'product_id';
-
+    protected $primaryKey = 'product_id'; // default is 'id', but your table uses 'product_id'
     // Allow mass assignment for these fields
     protected $fillable = [
         'name',

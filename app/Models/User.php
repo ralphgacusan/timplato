@@ -24,7 +24,10 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
+        'profile_picture_path',
         'role',
+        'gender',
+        'date_of_birth',
     ];
 
     public function addresses()
@@ -36,6 +39,34 @@ class User extends Authenticatable
     {
         return $this->hasMany(Wishlist::class, 'user_id', 'id');
     }
+
+    // ---------------------------
+    // Custom Helper Methods
+    // ---------------------------
+
+    // Get full name
+    public function getFullName(): string
+    {
+        return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    public function getFullAddress(): string
+    {
+        // Try to get default address
+        $defaultAddress = $this->addresses()->where('is_default', 1)->first();
+
+        // Fallback: pick first address if no default
+        if (!$defaultAddress) {
+            $defaultAddress = $this->addresses()->first();
+        }
+
+        if ($defaultAddress) {
+            return "{$defaultAddress->address}, {$defaultAddress->city}, {$defaultAddress->state} {$defaultAddress->zip_code}, {$defaultAddress->country}";
+        }
+
+        return "Address not set";
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -57,6 +88,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'date_of_birth' => 'date', 
         ];
     }
 }
