@@ -40,6 +40,19 @@ class User extends Authenticatable
         return $this->hasMany(Wishlist::class, 'user_id', 'id');
     }
 
+    public function wishlistItems()
+{
+    return $this->hasMany(\App\Models\Wishlist::class, 'user_id', 'id');
+}
+
+public function wishlistProducts()
+{
+    return $this->belongsToMany(\App\Models\Product::class, 'wishlists', 'user_id', 'product_id', 'id', 'product_id');
+}
+
+
+
+
     // ---------------------------
     // Custom Helper Methods
     // ---------------------------
@@ -66,6 +79,12 @@ class User extends Authenticatable
 
         return "Address not set";
     }
+
+
+    public function notifications()
+{
+    return $this->hasMany(Notification::class, 'user_id');
+}
 
 
     /**

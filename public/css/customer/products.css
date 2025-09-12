@@ -88,7 +88,7 @@ body {
     align-items: center;
     transition: transform 0.2s;
 
-    height: 480px;
+    height: 450px;
     /* fixed height for all cards */
     box-sizing: border-box;
     /* includes padding in height */
@@ -138,73 +138,6 @@ body {
 }
 
 
-/* Product Card Buttons Container */
-.product-card .product-buttons {
-    margin-top: auto;
-    /* push buttons to bottom */
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    justify-content: center;
-}
-
-/* Buy Now Button */
-.product-card .buy-btn {
-    flex: 1;
-    padding: 10px 0;
-    width: 180px;
-
-    /* shorter height */
-    background: #648DE5;
-    color: #fff;
-    font-weight: 600;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background 0.2s;
-}
-
-.product-card .buy-btn:hover {
-    background: #4b73c0;
-}
-
-/* Add to Cart Button (square with icon only) */
-.product-card .add-cart-btn {
-    width: 48px;
-    /* square */
-    height: 48px;
-    /* square */
-    background: #9EB7E5;
-    border: none;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: background 0.2s;
-    padding: 0;
-}
-
-.product-card .add-cart-btn:hover {
-    background: #7da1d1;
-}
-
-/* Add to Cart Button (square with icon only) */
-.product-card .add-cart-btn i {
-    stroke-width: 2;
-    stroke: #fff;
-    /* Lucide icon color white */
-    width: 20px;
-    height: 20px;
-}
-
-.add-cart-btn svg {
-    stroke: #fff !important;
-    /* force white */
-    width: 20px;
-    height: 20px;
-}
 
 .link {
 
@@ -215,4 +148,102 @@ body {
     cursor: pointer;
     /* Optional: make it look clickable */
 
+}
+
+/* Product Card Buttons Container */
+.product-card .product-buttons {
+    margin-top: auto;
+    display: flex;
+    gap: 6px;
+    /* reduce gap to fit buttons inside card */
+    width: 100%;
+    padding: 0 2px;
+    /* keeps space from edges */
+    justify-content: flex-start;
+    box-sizing: border-box;
+}
+
+/* Common button height */
+.product-card .product-buttons button {
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+/* Buy Now Button (flexible, rectangle) */
+.product-card .buy-btn {
+    flex: 1;
+    min-width: 120px;
+    background: #648DE5;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.product-card .buy-btn:hover {
+    background: #4b73c0;
+    transform: scale(1.03);
+}
+
+/* Add to Cart Button (square) */
+.product-card .add-cart-btn {
+    width: 48px;
+    flex-shrink: 0;
+    /* prevent shrinking */
+    background: #9EB7E5;
+    padding: 0;
+}
+
+.product-card .add-cart-btn:hover {
+    background: #7da1d1;
+    transform: scale(1.1);
+}
+
+/* Existing square wishlist button */
+.product-card .wishlist-btn {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    background: #FF914D;
+    color: #fff;
+    padding: 0;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.product-card .wishlist-btn:hover {
+    background: #E67E3D;
+    transform: scale(1.1);
+}
+
+/* Added-to-wishlist state */
+.product-card .wishlist-btn.added {
+    background: #E67E3D;
+    /* darker orange */
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Optional: filled heart icon for added */
+.product-card .wishlist-btn.added i {
+    stroke: #fff;
+    fill: #fff;
+    /* make the heart fully filled */
+}
+
+
+/* Icon sizes */
+.product-card .add-cart-btn i,
+.product-card .wishlist-btn i {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2;
 }

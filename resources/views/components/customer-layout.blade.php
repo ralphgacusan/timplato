@@ -21,14 +21,74 @@
         <!-- Header with Navigation -->
         {{-- Nav --}}
         <div class="nav">
-            <img src="{{ asset('timplatoLogo/Timplato-White2.png') }}" alt="Timplato Logo" class="logo">
+            <a href="{{ route('customer.home') }}" style="text-decoration: none; color: inherit;"><img
+                    src="{{ asset('timplatoLogo/Timplato-White2.png') }}" alt="Timplato Logo" class="logo"></a>
             <ul>
-                <li class="search-nav-item" style="position:relative;">
+                {{-- TO BE FIXED --}}
+                {{-- <li class="search-nav-item" style="position:relative;">
                     <a href="#" id="searchToggle"><i data-lucide="search"></i></a>
                     <input type="text" id="navbarSearchBar" class="navbar-search-bar" placeholder="Search..." />
-                </li>
+                </li> --}}
                 <li><a href="{{ route('customer.home') }}"><i data-lucide="house"></i></a></li>
+                <li><a href="{{ route('customer.products') }}"><i data-lucide="store"></i></a></li>
                 <li><a href="{{ route('customer.cart') }}"><i data-lucide="shopping-cart"></i></a></li>
+
+                @auth
+
+                    <li><a href="{{ route('customer.wishlist.index') }}"><i data-lucide="heart"></i></a></li>
+                    <li><a href="#" id="notificationToggle"><i data-lucide="bell"></i></a></li>
+
+                    <div id="notificationModal" class="notification-modal">
+                        <div class="notification-modal-content">
+                            <h2 class="notification-modal-title">Recently Received Notifications</h2>
+                            <hr class="notification-modal-divider">
+                            <div class="notification-list">
+                                @forelse($notifications as $notification)
+                                    @php
+                                        $imageUrl = null;
+
+                                        if ($notification->product?->primaryImage) {
+                                            $imageUrl = asset(
+                                                'images/' . $notification->product->primaryImage->image_url,
+                                            );
+                                        } elseif ($notification->order?->items->first()?->product?->primaryImage) {
+                                            $imageUrl = asset(
+                                                'images/' .
+                                                    $notification->order->items->first()->product->primaryImage
+                                                        ->image_url,
+                                            );
+                                        } else {
+                                            $imageUrl = asset('images/product-placeholder.png');
+                                        }
+                                    @endphp
+
+                                    <div class="notification-item">
+                                        <div class="notification-img">
+                                            <img src="{{ $imageUrl }}" alt="Notification Image"
+                                                style="width:40px;height:40px;object-fit:cover;">
+                                        </div>
+                                        <div class="notification-info">
+                                            <div class="notification-text">
+                                                {!! $notification->message !!}
+                                            </div>
+                                            <div class="notification-date">
+                                                {{ $notification->created_at->format('M d, Y H:i') }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <p class="text-center py-3">No notifications available.</p>
+                                @endforelse
+                            </div>
+                            <a href="{{ route('auth.user-profile', Auth::user()->id) }}#notifications-section"
+                                class="notification-viewall-btn">
+                                View All
+                            </a>
+                        </div>
+                    </div>
+                @endauth
+
+
                 {{-- User Dropdown --}}
                 <li class="dropdown-user" style="position:relative;">
                     @guest
@@ -89,6 +149,10 @@
 
         <!-- Footer -->
         <div class="footer">
+            <a href="{{ route('customer.customer-support.index') }}" style="text-decoration: none; color: inherit;">
+                <p>Help Center</p>
+            </a>
+
             <p>&copy; 2023 Timplato. All rights reserved.</p>
         </div>
     </div>

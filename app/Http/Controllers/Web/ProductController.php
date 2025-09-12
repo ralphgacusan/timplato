@@ -30,11 +30,21 @@ class ProductController extends Controller
     }
 
     // Show a specific product
-    public function specificProduct(Product $product)
-    {
-        $product->load(['category', 'images']);
-        return view('customer.specific-product', compact('product'));
-    }
+public function specificProduct(Product $product)
+{
+    $product->load([
+        'category',
+        'images',
+        'reviews.user',
+    ]);
+
+    // Calculate stats
+    $averageRating = $product->reviews()->avg('rating') ?? 0;
+    $totalReviews  = $product->reviews()->count();
+
+    return view('customer.specific-product', compact('product', 'averageRating', 'totalReviews'));
+}
+
 
     // Filter Products
     public function filterProducts(Request $request) {

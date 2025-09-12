@@ -50,4 +50,16 @@ class Product extends Model
         return $this->hasMany(Wishlist::class, 'product_id', 'product_id');
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'product_id', 'product_id');
+    }
+
+    
+// In Product.php
+public function notifications()
+{
+    return $this->hasMany(Notification::class, 'product_id', 'product_id');
+}
+
 }

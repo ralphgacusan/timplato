@@ -10,8 +10,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
+
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Cart;
+use App\Models\Notification;
+
 
 class AuthController extends Controller
 {
@@ -120,17 +124,18 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($validated)) {
-            // Regenerate session
+            // Get old session ID first
+            $oldSessionId = $request->session()->getId();
+
+            // Regenerate session (prevents fixation attacks)
             $request->session()->regenerate();
-        
-            // Create success message
+
+            // Merge guest cart using old session id
+            $this->mergeGuestCart($oldSessionId);
+
             $successMessage = 'Sign-in successful, welcome back ' . Auth::user()->first_name . '!';
-            Log::info('User Success Message: ' . $successMessage);
-        
-            // Redirect to client area
             return redirect()->intended(route('customer.home'))->with('success', $successMessage);
-        } 
-        else {
+        } else {
             // Authentication failed
             return back()->withErrors([
                 'email' => 'The provided credentials do not match our records.',
@@ -156,17 +161,37 @@ class AuthController extends Controller
     // Customer/UserProfileController.php
 
     public function showUserProfile()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        // Eager load orders with items and products
-        $orders = Order::with(['items.product', 'statusHistory'])
-                    ->where('user_id', $user->id)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+    // Load all orders once with items and product images
+    $orders = Order::with(['items.product.primaryImage'])
+        ->where('user_id', $user->id)
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-        return view('customer.user-profile', compact('user', 'orders'));
-    }
+    // Group orders by status
+    $groupedOrders = [
+        'all' => $orders,
+        'to-pay' => $orders->filter(fn($o) => $o->current_status === 'pending')->values(),
+        'to-ship' => $orders->filter(fn($o) => in_array($o->current_status, ['confirmed', 'processing']))->values(),
+        'to-receive' => $orders->filter(fn($o) => $o->current_status === 'shipped')->values(),
+        'completed' => $orders->filter(fn($o) => $o->current_status === 'delivered')->values(),
+        'cancelled' => $orders->filter(fn($o) => $o->current_status === 'cancelled')->values(),
+        'return-refund' => $orders->filter(fn($o) => in_array($o->current_status, ['returned', 'refunded']))->values(),
+    ];
+
+    // Fetch both user-specific and general notifications
+    $notifications = Notification::with(['order.items.product.primaryImage', 'product'])
+        ->where('user_id', $user->id)
+        ->orWhereNull('user_id') // include general notifications
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return view('customer.user-profile', compact('user', 'groupedOrders', 'notifications'));
+}
+
+
 
 
 
@@ -221,6 +246,29 @@ class AuthController extends Controller
 
 
 
+
+    private function mergeGuestCart($oldSessionId)
+    {
+        $guestCart = Cart::where('session_id', $oldSessionId)->first();
+        $userCart = Cart::firstOrCreate(['user_id' => Auth::id()]);
+
+        if ($guestCart) {
+            foreach ($guestCart->items as $item) {
+                $existing = $userCart->items()
+                    ->where('product_id', $item->product_id)
+                    ->first();
+
+                if ($existing) {
+                    $existing->quantity += $item->quantity;
+                    $existing->save();
+                } else {
+                    $item->cart_id = $userCart->cart_id;
+                    $item->save();
+                }
+            }
+            $guestCart->delete();
+        }
+    }
 
 
 

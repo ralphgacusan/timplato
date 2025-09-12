@@ -11,16 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('carts', function (Blueprint $table) {
+        Schema::create('carts', function (Blueprint $table) {
             $table->id('cart_id'); // Primary key
-            $table->unsignedBigInteger('user_id'); // FK to users
-            $table->timestamps(); // created_at and updated_at
+
+            // User cart OR Guest cart
+            $table->unsignedBigInteger('user_id')->nullable(); // FK to users, nullable for guests
+            $table->string('session_id')->nullable()->index(); // For guest carts
+
+            $table->timestamps();
+
             // Foreign key constraints
             $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
+
     }
 
     /**

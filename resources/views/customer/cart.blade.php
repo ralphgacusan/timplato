@@ -12,39 +12,43 @@
         <div class="cart-products-section">
             @if ($cart->items->count() > 0)
                 @foreach ($cart->items as $item)
-                    <div class="cart-product-card">
-                        <div class="cart-product-img">
-                            <img src="{{ $item->product->primaryImage ? asset('images/' . $item->product->primaryImage->image_url) : asset('images/no-image.png') }}"
-                                alt="{{ $item->product->name }}"
-                                style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
-                        </div>
-                        <div class="cart-product-details">
-                            <div class="cart-product-title">{{ $item->product->name }}</div>
-                            <div class="cart-product-subtitle">{{ Str::limit($item->product->description, 30) }}</div>
-                            <div class="cart-product-price">₱{{ number_format($item->product->price, 2) }}</div>
-
-                            <div class="cart-qty-row">
-                                <button class="cart-qty-btn cart-qty-minus"
-                                    data-id="{{ $item->cart_item_id }}">-</button>
-                                <span class="cart-qty-value"
-                                    id="qty-{{ $item->cart_item_id }}">{{ $item->quantity }}</span>
-                                <button class="cart-qty-btn cart-qty-plus"
-                                    data-id="{{ $item->cart_item_id }}">+</button>
-                                <span class="cart-qty-total"
-                                    id="total-{{ $item->cart_item_id }}">₱{{ number_format($item->product->price * $item->quantity, 2) }}</span>
+                    <a href="{{ route('customer.specific-product', $item->product->product_id) }}"
+                        class="order-card-link text-decoration-none">
+                        <div class="cart-product-card">
+                            <div class="cart-product-img">
+                                <img src="{{ $item->product->primaryImage ? asset('images/' . $item->product->primaryImage->image_url) : asset('images/no-image.png') }}"
+                                    alt="{{ $item->product->name }}"
+                                    style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
                             </div>
+                            <div class="cart-product-details">
+                                <div class="cart-product-title">{{ $item->product->name }}</div>
+                                <div class="cart-product-subtitle">{{ Str::limit($item->product->description, 30) }}
+                                </div>
+                                <div class="cart-product-price">₱{{ number_format($item->product->price, 2) }}</div>
 
-                            <div class="cart-actions-row">
-                                {{-- {{ route('customer.remove-cart-item', $item->cart_item_id) }} --}}
-                                <form class="cart-remove-form" data-id="{{ $item->cart_item_id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm"><span
-                                            class="icon-trash"></span> Remove</button>
-                                </form>
+                                <div class="cart-qty-row">
+                                    <button class="cart-qty-btn cart-qty-minus"
+                                        data-id="{{ $item->cart_item_id }}">-</button>
+                                    <span class="cart-qty-value"
+                                        id="qty-{{ $item->cart_item_id }}">{{ $item->quantity }}</span>
+                                    <button class="cart-qty-btn cart-qty-plus"
+                                        data-id="{{ $item->cart_item_id }}">+</button>
+                                    <span class="cart-qty-total"
+                                        id="total-{{ $item->cart_item_id }}">₱{{ number_format($item->product->price * $item->quantity, 2) }}</span>
+                                </div>
+
+                                <div class="cart-actions-row">
+                                    {{-- {{ route('customer.remove-cart-item', $item->cart_item_id) }} --}}
+                                    <form class="cart-remove-form" data-id="{{ $item->cart_item_id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm"><span
+                                                class="icon-trash"></span> Remove</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 @endforeach
             @else
                 <p>Your cart is empty.</p>

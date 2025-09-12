@@ -69,14 +69,30 @@
                                     <input type="hidden" name="quantity" value="1">
                                     <button type="submit" class="buy-btn">Buy Now</button>
                                 </form>
+
                                 <!-- Add to Cart Form -->
                                 <form action="{{ route('customer.add-to-cart', $product) }}" method="POST">
                                     @csrf
-                                    <!-- Hidden default quantity -->
                                     <input type="hidden" name="quantity" value="1">
-
                                     <button type="submit" class="add-cart-btn">
                                         <i data-lucide="shopping-cart"></i>
+                                    </button>
+                                </form>
+
+                                <!-- Dynamic Wishlist Button -->
+                                @php
+                                    $isInWishlist = auth()->check()
+                                        ? auth()->user()->wishlistItems->contains('product_id', $product->product_id)
+                                        : false;
+                                @endphp
+
+                                <form action="{{ route('customer.wishlist.add', $product) }}" method="POST"
+                                    class="wishlist-form">
+                                    @csrf
+                                    <button type="submit" class="wishlist-btn {{ $isInWishlist ? 'added' : '' }}"
+                                        title="{{ $isInWishlist ? 'Already in Wishlist' : 'Add to Wishlist' }}"
+                                        {{ $isInWishlist ? 'disabled' : '' }}>
+                                        <i data-lucide="heart" class="{{ $isInWishlist ? 'filled' : '' }}"></i>
                                     </button>
                                 </form>
                             </div>

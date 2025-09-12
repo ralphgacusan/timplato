@@ -65,34 +65,81 @@
                     <button type="submit" class="buy-btn">Buy Now</button>
                 </form>
 
+                <!-- Add to Cart Form -->
                 <form action="{{ route('customer.add-to-cart', $product) }}" method="POST">
                     @csrf
-                    <!-- Hidden default quantity -->
-                    <input type="hidden" id="quantityInput" name="quantity" value="1">
-
+                    <input type="hidden" name="quantity" value="1">
                     <button type="submit" class="add-cart-btn">
                         <i data-lucide="shopping-cart"></i> <span>Add to Cart</span>
-
                     </button>
                 </form>
+
+                @php
+                    $isInWishlist = auth()->check()
+                        ? auth()->user()->wishlistProducts->contains($product->product_id)
+                        : false;
+                @endphp
+
+
+
+                <form action="{{ route('customer.wishlist.add', $product) }}" method="POST" class="wishlist-form">
+                    @csrf
+                    <button type="submit" class="wishlist-btn {{ $isInWishlist ? 'added' : '' }}"
+                        title="{{ $isInWishlist ? 'Already in Wishlist' : 'Add to Wishlist' }}"
+                        {{ $isInWishlist ? 'disabled' : '' }}>
+                        <i data-lucide="heart" class="{{ $isInWishlist ? 'filled' : '' }}"></i>
+                        <span
+                            class="wishlist-text">{{ $isInWishlist ? 'Added to Wishlist' : 'Add to Wishlist' }}</span>
+                    </button>
+                </form>
+
+
             </div>
+
+
         </div>
     </div>
 
-    <!-- Reviews Section (dummy) -->
+    <!-- Reviews Section -->
     <div class="reviews-section">
-        <h3>Customer Reviews (9)</h3>
-        <div class="review-card">
-            <div class="review-name">John D.</div>
-            <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            <div class="review-body">Excellent pans! Nonstick works perfectly and easy to clean.</div>
-        </div>
-        <div class="review-card">
-            <div class="review-name">Jane S.</div>
-            <div class="review-stars">&#9733;&#9733;&#9733;&#9733;</div>
-            <div class="review-body">Good quality but a bit pricey. Overall very satisfied.</div>
-        </div>
+        <h3>Customer Reviews ({{ $totalReviews }})</h3>
+
+        @if ($totalReviews > 0)
+            <div class="rating-summary mb-4">
+                <span class="rating-average">
+                    {{ number_format($averageRating, 1) }} / 5
+                </span>
+                <span class="rating-stars">
+                    {!! str_repeat('&#9733;', floor($averageRating)) !!}
+                    @if ($averageRating - floor($averageRating) >= 0.5)
+                        &#189; {{-- half star --}}
+                    @endif
+                    {!! str_repeat('&#9734;', 5 - ceil($averageRating)) !!}
+                </span>
+            </div>
+        @endif
+
+        @forelse ($product->reviews as $review)
+            <div class="review-card">
+                <div class="review-header">
+                    {{ $review->user->getFullName() ?? 'Anonymous' }}
+                    <span class="review-stars">
+                        {!! str_repeat('&#9733;', $review->rating) !!}
+                        {!! str_repeat('&#9734;', 5 - $review->rating) !!}
+                    </span>
+                </div>
+                <div class="review-body">
+                    {{ $review->comment ?? 'No comment provided.' }}
+                </div>
+                <div class="review-date">
+                    Reviewed on {{ $review->created_at->format('F j, Y') }}
+                </div>
+            </div>
+        @empty
+            <p class="text-gray-600">No reviews yet. Be the first to review this product!</p>
+        @endforelse
     </div>
+
 
     <script>
         // Image slider

@@ -86,3 +86,37 @@ function showNotification(message, type = 'success', duration = 6000) {
         notif.remove();
     }, duration);
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const bell = document.getElementById('notificationToggle');
+    const modal = document.getElementById('notificationModal');
+
+    function toggleModal() {
+        modal.classList.toggle('show');
+    }
+
+    function closeModal() {
+        modal.classList.remove('show');
+    }
+
+    // Toggle modal when bell is clicked
+    bell.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation(); // Prevent document click from firing
+        toggleModal();
+    });
+
+    // Close when clicking outside modal
+    document.addEventListener('click', function (e) {
+        if (modal.classList.contains('show') && !modal.contains(e.target) && e.target !== bell) {
+            closeModal();
+        }
+    });
+
+    // Optional: close on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === "Escape") {
+            closeModal();
+        }
+    });
+});

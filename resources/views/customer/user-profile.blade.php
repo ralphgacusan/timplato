@@ -107,7 +107,9 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Date of Birth</label>
-                    <input type="text" class="form-control" value="{{ Auth::user()->date_of_birth }}" readonly>
+                    <input type="text" class="form-control"
+                        value="{{ Auth::user()->date_of_birth ? \Carbon\Carbon::parse(Auth::user()->date_of_birth)->format('F d, Y') : '' }}"
+                        readonly>
                 </div>
             </div>
 
@@ -139,78 +141,196 @@
                 <!-- Main Delivery Content -->
                 <div class="col-lg-9">
                     <div class="delivery-main p-3 shadow-sm rounded">
-                        <div class="delivery-tabs d-flex gap-3 border-bottom mb-3">
-                            <div class="delivery-tab active" data-tab="to-ship">To Ship</div>
-                            <div class="delivery-tab" data-tab="to-receive">To Receive</div>
-                            <div class="delivery-tab" data-tab="completed">Completed</div>
+
+                        {{-- Tabs --}}
+                        <div class="delivery-tabs d-flex gap-3 border-bottom mb-3" id="purchaseTabs">
+                            @php
+                                $tabs = [
+                                    'all' => 'All',
+                                    'to-pay' => 'To Pay',
+                                    'to-ship' => 'To Ship',
+                                    'to-receive' => 'To Receive',
+                                    'completed' => 'Completed',
+                                    'cancelled' => 'Cancelled',
+                                    'return-refund' => 'Return/Refund',
+                                ];
+                            @endphp
+
+
+                            @foreach ($tabs as $key => $label)
+                                <div class="delivery-tab {{ $loop->first ? 'active' : '' }}"
+                                    data-tab="{{ $key }}">
+                                    {{ $label }}
+                                </div>
+                            @endforeach
                         </div>
 
+                        {{-- Content --}}
                         <div id="deliveryContent">
-                            @forelse ($orders as $order)
-                                <div class="order-card p-3 mb-3 shadow-sm rounded">
-                                    <div class="order-header d-flex justify-content-between mb-2">
-                                        <span class="store fw-bold">Timplato</span>
-                                        <div class="order-actions">
-                                            <button class="btn btn-primary btn-sm">Chat</button>
-                                        </div>
-                                    </div>
-
-                                    @foreach ($order->items as $item)
-                                        <div class="order-details d-flex align-items-center gap-3 mb-2">
-                                            @php
-                                                $primaryImage = $item->product->primaryImage->image_url ?? null;
-                                                $itemSubtotal = $item->quantity * ($item->product->price ?? 0);
-                                            @endphp
-
-                                            <img src="{{ $primaryImage ? asset('images/' . $primaryImage) : asset('images/no-image.png') }}"
-                                                alt="{{ $item->product->name ?? 'Product' }}" class="rounded"
-                                                style="width:60px;height:60px;object-fit:cover;">
-
-                                            <div class="order-info flex-grow-1">
-                                                <div class="title fw-bold">
-                                                    {{ $item->product->name ?? 'Product Name' }}</div>
-                                                <div class="qty">x{{ $item->quantity }}</div>
-                                            </div>
-
-                                            <div class="item-subtotal fw-bold text-end">
-                                                ₱{{ number_format($itemSubtotal, 2) }}
-                                            </div>
-                                        </div>
-                                    @endforeach
-
-                                    <!-- Move order status OUTSIDE the items loop -->
-                                    <div class="order-status text-end mb-2">
-                                        <div class="delivered text-primary fw-bold">
-                                            {{ $order->current_status }}
-                                        </div>
-                                    </div>
-
-                                    <div class="order-footer d-flex justify-content-between mb-2">
-                                        <div class="confirm">Confirm receipt after checking items</div>
-                                        <div class="total fw-bold">Order Total:
-                                            ₱{{ number_format($order->total_amount, 2) }}</div>
-                                    </div>
-
-                                    <div class="order-actions-main d-flex gap-2">
-                                        <button class="btn btn-dark flex-fill">Cancel Order</button>
-
+                            @foreach ($tabs as $status => $label)
+                                <div class="tab-content {{ $loop->first ? 'active' : '' }}"
+                                    data-content="{{ $status }}">
+                                    @forelse ($groupedOrders[$status] ?? [] as $order)
                                         <a href="{{ route('customer.orderDetails', $order->order_id) }}"
-                                            class="btn btn-primary flex-fill">
-                                            Order Details
+                                            class="order-card-link text-decoration-none">
+                                            <div class="order-card p-3 mb-3 shadow-sm rounded">
+
+                                                <div class="order-header d-flex justify-content-between mb-2">
+                                                    <span class="store fw-bold">Timplato</span>
+                                                    <div class="order-actions">
+                                                        <button class="btn btn-primary btn-sm">Chat</button>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Items --}}
+                                                @foreach ($order->items as $item)
+                                                    @php
+                                                        $primaryImage = $item->product->primaryImage->image_url ?? null;
+                                                        $itemSubtotal = $item->quantity * ($item->product->price ?? 0);
+                                                    @endphp
+                                                    <div class="order-details d-flex align-items-center gap-3 mb-2">
+                                                        <img src="{{ $primaryImage ? asset('images/' . $primaryImage) : asset('images/no-image.png') }}"
+                                                            alt="{{ $item->product->name ?? 'Product' }}"
+                                                            class="rounded"
+                                                            style="width:60px;height:60px;object-fit:cover;">
+
+                                                        <div class="order-info flex-grow-1">
+                                                            <div class="title fw-bold">
+                                                                {{ $item->product->name ?? 'Product Name' }}</div>
+                                                            <div class="qty">x{{ $item->quantity }}</div>
+                                                        </div>
+
+                                                        <div class="item-subtotal fw-bold text-end">
+                                                            ₱{{ number_format($itemSubtotal, 2) }}
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+
+                                                {{-- Status --}}
+                                                <div class="order-status text-end mb-2">
+                                                    <div class="delivered text-primary fw-bold">
+                                                        {{ ucfirst($order->current_status) }}</div>
+                                                </div>
+
+                                                {{-- Footer --}}
+                                                <div class="order-footer d-flex justify-content-between mb-2">
+                                                    <div class="confirm">Confirm receipt after checking items</div>
+                                                    <div class="total fw-bold">
+                                                        Order Total: ₱{{ number_format($order->total_amount, 2) }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="order-actions-main d-flex gap-2 justify-content-end">
+                                                    @php $status = $order->current_status; @endphp
+
+                                                    @if ($status === 'pending')
+                                                        <button class="btn btn-dark">Cancel Order</button>
+                                                    @elseif (in_array($status, ['confirmed', 'processing']))
+                                                        <button class="btn btn-warning">Track Order</button>
+                                                    @elseif (in_array($status, ['shipped', 'to_receive']))
+                                                        <button class="btn btn-warning">Request
+                                                            Return/Refund</button>
+                                                        <button class="btn btn-success">Order Received</button>
+                                                    @elseif (in_array($status, ['delivered', 'completed']))
+                                                        <button class="btn btn-outline-secondary">Leave a
+                                                            Review</button>
+                                                        <button class="btn btn-success">Buy Again</button>
+                                                    @elseif ($status === 'cancelled')
+                                                        <button class="btn btn-success">Buy Again</button>
+                                                    @elseif (in_array($status, ['returned', 'refunded']))
+                                                        <button class="btn btn-success">Buy Again</button>
+                                                    @endif
+                                                </div>
+
+
+                                            </div>
                                         </a>
-                                    </div>
+                                    @empty
+                                        <div class="text-center py-5">
+                                            <p>No orders in this section.</p>
+                                        </div>
+                                    @endforelse
                                 </div>
-                            @empty
-                                <div class="text-center py-5">
-                                    <p>No orders yet.</p>
-                                </div>
-                            @endforelse
+                            @endforeach
                         </div>
+
+                        <!-- Notifications Section -->
+                        <div id="notifications-section" class="notifications-section mt-4" style="display: none;">
+                            <div class="notification-main p-3 shadow-sm rounded">
+
+                                <h5 class="mb-3 fw-semibold">Notifications</h5>
+
+                                @forelse($notifications as $notification)
+                                    @php
+                                        $imageUrl = null;
+
+                                        // Check if notification is related to a product
+                                        if ($notification->product?->primaryImage) {
+                                            $imageUrl = asset(
+                                                'images/' . $notification->product->primaryImage->image_url,
+                                            );
+                                        }
+                                        // If not, check if notification is related to an order with items
+                                        elseif ($notification->order?->items->first()?->product?->primaryImage) {
+                                            $imageUrl = asset(
+                                                'images/' .
+                                                    $notification->order->items->first()->product->primaryImage
+                                                        ->image_url,
+                                            );
+                                        }
+                                        // Else, use a default placeholder or leave null
+                                        else {
+                                            $imageUrl = asset('images/product-placeholder.png');
+                                        }
+                                    @endphp
+
+                                    <div class="notification-card">
+                                        <div class="notification-header">
+                                            <span class="notification-title">{{ $notification->title }}</span>
+                                            <button class="notification-details-btn">View Details</button>
+                                        </div>
+                                        <div class="notification-details">
+                                            @if ($imageUrl)
+                                                <img src="{{ $imageUrl }}" alt="Notification Image"
+                                                    class="notification-img">
+                                            @endif
+                                            <div class="notification-info">
+                                                <div class="notification-desc">
+                                                    {!! $notification->message !!}
+                                                </div>
+                                                <div class="notification-date">
+                                                    {{ $notification->created_at->format('m/d/Y H:i') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="text-center py-3">
+                                        <p>No notifications found.</p>
+                                    </div>
+                                @endforelse
+
+                            </div>
+                        </div>
+
+
+
+
+
                     </div>
+
+
+
+
                 </div>
+
             </div>
         </div>
-        <script src="../JS/delivery.js"></script>
+
+
+
+
+        <script src="{{ asset('js/customer/delivery.js') }}"></script>
 
     </div>
 </x-customer-layout>

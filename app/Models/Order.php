@@ -19,7 +19,7 @@ class Order extends Model
     'current_status',
     'payment_method',
     'tracking_number',
-    'discount',       // new
+    'discount_amount',       // new
     'voucher_code',   // new
 ];
 
@@ -56,4 +56,13 @@ class Order extends Model
     {
         return $this->hasMany(OrderStatusHistory::class, 'order_id', 'order_id');
     }
+
+    // In Order.php
+public function notifications()
+{
+    return $this->hasMany(Notification::class, 'order_id', 'order_id');
+}
+
+
+
 }

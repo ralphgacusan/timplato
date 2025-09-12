@@ -42,7 +42,8 @@
                             </thead>
                             <tbody>
                                 @foreach ($items as $item)
-                                    <tr>
+                                    <tr onclick="window.location='{{ route('customer.specific-product', $item->product->product_id) }}';"
+                                        style="cursor:pointer;">
                                         <td style="width:70px;">
                                             <div style="width:60px;height:60px;background:#e3eafc;border-radius:8px;">
                                                 @php
@@ -56,7 +57,8 @@
                                         <td>
                                             <div class="fw-semibold">{{ $item->product->name }}</div>
                                             <div class="text-muted" style="font-size:0.95rem;">
-                                                {{ $item->product->description ?? 'No description' }}</div>
+                                                {{ $item->product->description ?? 'No description' }}
+                                            </div>
                                         </td>
                                         <td>₱{{ number_format($item->product->price, 2) }}</td>
                                         <td>{{ $item->quantity }}x</td>
@@ -203,21 +205,42 @@
                 // Apply voucher
                 applyVoucherBtn.addEventListener('click', () => {
                     const code = voucherInput.value.trim().toUpperCase();
-                    if (code === 'ALDEN50') {
-                        discount = 50;
-                        voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
-                        voucherMessageEl.style.color = 'green';
-                    } else if (code === 'DEENICE10') {
-                        discount = (subtotal + deliveryFee) * 0.10;
-                        voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
-                        voucherMessageEl.style.color = 'green';
-                    } else {
-                        discount = 0;
-                        voucherMessageEl.textContent = `Invalid voucher code.`;
-                        voucherMessageEl.style.color = 'red';
+
+                    switch (code) {
+                        case 'ALDEN50':
+                            discount = 50;
+                            voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
+                            voucherMessageEl.style.color = 'green';
+                            break;
+                        case 'DEENICE10P':
+                            discount = (subtotal + deliveryFee) * 0.10;
+                            voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
+                            voucherMessageEl.style.color = 'green';
+                            break;
+                        case 'JOMSPOGI100':
+                            discount = 100;
+                            voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
+                            voucherMessageEl.style.color = 'green';
+                            break;
+                        case 'BAYUCAN20P':
+                            discount = (subtotal + deliveryFee) * 0.20;
+                            voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
+                            voucherMessageEl.style.color = 'green';
+                            break;
+                        case 'GACUSAN30':
+                            discount = (subtotal + deliveryFee) * 0.30;
+                            voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
+                            voucherMessageEl.style.color = 'green';
+                            break;
+                        default:
+                            discount = 0;
+                            voucherMessageEl.textContent = `Invalid voucher code.`;
+                            voucherMessageEl.style.color = 'red';
                     }
+
                     updateTotal();
                 });
+
 
                 // Initialize total
                 updateTotal();

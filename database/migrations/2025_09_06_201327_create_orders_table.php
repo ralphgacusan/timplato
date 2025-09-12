@@ -21,7 +21,16 @@ return new class extends Migration
 
             // Order details
             $table->decimal('total_amount', 10, 2); 
-            $table->string('current_status')->default('pending'); // pending, shipped, delivered, etc.
+            $table->enum('current_status', [
+                'pending',     // order placed, waiting for confirmation
+                'confirmed',   // confirmed by seller/admin
+                'processing',  // preparing / being packed
+                'shipped',     // handed over to courier
+                'delivered',   // successfully received by customer
+                'cancelled',   // cancelled by user or admin
+                'returned',    // returned by customer
+                'refunded',    // refunded to customer
+            ])->default('pending');            
             $table->string('payment_method'); // cod, gcash, credit_card, etc.
             $table->string('tracking_number')->nullable();
 

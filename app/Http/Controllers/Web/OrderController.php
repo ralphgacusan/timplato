@@ -65,12 +65,18 @@ class OrderController extends Controller
     $deliveryFee = $deliveryFees[$request->deliveryMethod] ?? 0;
 
     // Voucher/discount logic
-    $discount;
+    $discount = 0;
     $voucher = strtoupper($request->coupon ?? '');
     if ($voucher === 'ALDEN50') {
         $discount = 50;
-    } elseif ($voucher === 'DEENICE10') {
+    } elseif ($voucher === 'DEENICE10P') {
         $discount = ($subtotal + $deliveryFee) * 0.10;
+    } elseif ($voucher === 'JOMSPOGI100') {
+        $discount = 100;
+    } elseif ($voucher === 'BAYUCAN20P') {
+        $discount = ($subtotal + $deliveryFee) * 0.20;
+    } elseif ($voucher === 'GACUSAN30') {
+        $discount = ($subtotal + $deliveryFee) * 0.30;
     }
 
     $totalAmount = $subtotal + $deliveryFee - $discount;
@@ -93,9 +99,13 @@ class OrderController extends Controller
         ]);
     }
 
-    if ($request->input('clear_cart')) {
-        Cart::where('user_id', $user->id)->first()?->items()->delete();
-    }
+    $cart = Cart::where('user_id', $user->id)->first();
+
+    if ($cart) {
+    $orderedProductIds = $items->pluck('product_id');
+
+    $cart->items()->whereIn('product_id', $orderedProductIds)->delete();
+}
 
     return redirect()->route('customer.home')->with('success', 'Order placed successfully!');
 }

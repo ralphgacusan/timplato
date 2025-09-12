@@ -97,6 +97,17 @@ body {
     overflow: hidden;
 }
 
+/* Subtle row separators */
+#checkoutProductsTable tbody tr {
+    border-bottom: 2px solid rgba(44, 62, 80, 0.1);
+    /* light gray line */
+}
+
+#checkoutProductsTable tbody tr:last-child {
+    border-bottom: none;
+    /* remove line from last row */
+}
+
 /* Payment Methods */
 .form-check-input:checked {
     background-color: var(--accent);
@@ -225,4 +236,43 @@ body {
     font-weight: 600;
     font-size: 1.08rem;
     margin-bottom: 12px;
+}
+
+
+
+
+/* Button colors */
+
+.order-actions-main .btn-success {
+    /* Order Received / Buy Again */
+    background-color: var(--primary);
+    color: var(--text);
+    border: none;
+}
+
+.order-actions-main .btn-warning {
+    /* Request Refund / Track */
+    background-color: var(--secondary);
+    color: var(--white);
+    border: none;
+}
+
+.order-actions-main .btn-dark {
+    /* Cancel Order */
+    background-color: var(--text);
+    color: var(--white);
+    border: none;
+}
+
+.order-actions-main .btn-outline-secondary {
+    /* Leave a Review */
+    background: none;
+    border: 2px solid var(--text);
+    color: var(--text);
+}
+
+/* Hover effects */
+.order-actions-main button:hover,
+.order-actions-main a.btn:hover {
+    opacity: 0.85;
 }

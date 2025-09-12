@@ -12,43 +12,46 @@ use App\Models\Product;
 class CartController extends Controller
 {
     // Show Cart Page
-    public function cartPage()
+   public function cartPage()
 {
-    $userId = Auth::id();
+    if (Auth::check()) {
+        $cart = Cart::with(['items.product.primaryImage'])
+            ->where('user_id', Auth::id())
+            ->first();
+    } else {
+        $cart = Cart::with(['items.product.primaryImage'])
+            ->where('session_id', session()->getId())
+            ->first();
+    }
 
-    // Get the cart for the user
-    $cart = Cart::with(['items.product.primaryImage'])->where('user_id', $userId)->first();
-
-    // Optional: If user has no cart yet, create an empty one
     if (!$cart) {
-        $cart = Cart::create(['user_id' => $userId]);
+        $cart = Auth::check()
+            ? Cart::create(['user_id' => Auth::id()])
+            : Cart::create(['session_id' => session()->getId()]);
     }
 
     return view('customer.cart', compact('cart'));
 }
-
 public function addToCart(Request $request, Product $product)
 {
     $request->validate([
         'quantity' => 'required|integer|min:1'
     ]);
 
-    $userId = Auth::id();
+    if (Auth::check()) {
+        $cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
+    } else {
+        $cart = Cart::firstOrCreate(['session_id' => session()->getId()]);
+    }
 
-    // Find or create the cart for the user
-    $cart = Cart::firstOrCreate(['user_id' => $userId]);
-
-    // Check if product already exists in this user's cart
     $cartItem = CartItem::where('cart_id', $cart->cart_id)
         ->where('product_id', $product->product_id)
         ->first();
 
     if ($cartItem) {
-        // If exists, just add to quantity
         $cartItem->quantity += $request->quantity;
         $cartItem->save();
     } else {
-        // Otherwise create new cart item
         CartItem::create([
             'cart_id'    => $cart->cart_id,
             'product_id' => $product->product_id,
@@ -85,6 +88,7 @@ public function remove($cartItemId)
 
     return response()->json(['success' => true]);
 }
+
 
 
 

@@ -6,6 +6,12 @@ use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\UserAddressController;
 use App\Http\Controllers\Web\CartController;
 use App\Http\Controllers\Web\OrderController;
+use App\Http\Controllers\Web\ReviewController;
+use App\Http\Controllers\Web\WishlistController;
+use App\Http\Controllers\Web\SupportTicketController;
+
+
+
 
 // Landing page
 Route::get('/', [ProductController::class, 'landingPage'])->name('customer.home');
@@ -101,3 +107,24 @@ Route::get('/orders/{order}', [OrderController::class, 'showOrderDetails'])->nam
 
 // // Resourceful routes for products (CRUD)
 // Route::resource('products', ProductController::class);
+
+
+
+// Review Routes
+Route::post('/products/{product_id}/reviews', [ReviewController::class, 'store'])->name('customer.reviews.store');
+
+
+
+// Wishlists Routes
+Route::post('/wishlist/add/{productId}', [WishlistController::class, 'add'])->name('customer.wishlist.add');
+
+Route::delete('/wishlist/remove/{productId}', [WishlistController::class, 'remove'])->name('customer.wishlist.remove');
+
+Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist.index');
+
+
+
+// Customer Supoprt Routes
+
+Route::get('/customer-support', [SupportTicketController::class, 'index'])->name('customer.customer-support.index');
+Route::post('/customer-support', [SupportTicketController::class, 'store'])->name('customer.customer-support.store');
