@@ -128,5 +128,42 @@ public function showOrderDetails(Order $order)
     ]);
 }
 
+// ADMIN SIDE
+    public function showOrderManagement(Request $request)
+    {
+        $query = Order::with(['user', 'rider', 'courier', 'items.product']);
+
+        // 🔹 Filter by payment method (MOP)
+        if ($request->filled('mop')) {
+            $query->where('payment_method', $request->mop);
+        }
+
+        // 🔹 Filter by status
+        if ($request->filled('status')) {
+            $query->where('current_status', $request->status);
+        }
+
+        // 🔹 Sorting
+        if ($request->filled('sort')) {
+            switch ($request->sort) {
+                case 'date-desc':
+                    $query->orderBy('created_at', 'desc');
+                    break;
+                case 'date-asc':
+                    $query->orderBy('created_at', 'asc');
+                    break;
+            }
+        } else {
+            // Default sort: newest first
+            $query->orderBy('created_at', 'desc');
+        }
+
+        // 🔹 Apply pagination (10 per page)
+        $orders = $query->paginate(10)->withQueryString();
+
+        return view('admin.order-management', compact('orders'));
+    }
+
+
 
 }

@@ -56,10 +56,28 @@ class Product extends Model
     }
 
     
-// In Product.php
-public function notifications()
-{
-    return $this->hasMany(Notification::class, 'product_id', 'product_id');
-}
+    // notifications
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'product_id', 'product_id');
+    }
+
+    // Category and Subcategory
+
+    public function getMainCategoryAttribute()
+    {
+        if (!$this->category) {
+            return 'Uncategorized';
+        }
+        return $this->category->parent ? $this->category->parent->name : $this->category->name;
+    }
+
+    public function getSubCategoryAttribute()
+    {
+        if ($this->category && $this->category->parent) {
+            return $this->category->name;
+        }
+        return 'N/A';
+    }
 
 }

@@ -61,14 +61,14 @@
                 <!-- Buy Now Form -->
                 <form action="{{ route('customer.checkout.buyNow', $product) }}" method="POST">
                     @csrf
-                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="quantity" value="1" class="quantity-input">
                     <button type="submit" class="buy-btn">Buy Now</button>
                 </form>
 
                 <!-- Add to Cart Form -->
                 <form action="{{ route('customer.add-to-cart', $product) }}" method="POST">
                     @csrf
-                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="quantity" value="1" class="quantity-input">
                     <button type="submit" class="add-cart-btn">
                         <i data-lucide="shopping-cart"></i> <span>Add to Cart</span>
                     </button>
@@ -157,12 +157,15 @@
             quantity += val;
             if (quantity < 1) quantity = 1;
 
-            // Update display
+            // Update visible number
             document.getElementById('quantityValue').textContent = quantity;
 
-            // Update hidden input
-            document.getElementById('quantityInput').value = quantity;
+            // Update ALL hidden inputs with class .quantity-input
+            document.querySelectorAll('.quantity-input').forEach(function(input) {
+                input.value = quantity;
+            });
         }
     </script>
+
 
 </x-customer-layout>

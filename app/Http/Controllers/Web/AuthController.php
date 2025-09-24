@@ -123,25 +123,34 @@ class AuthController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        if (Auth::attempt($validated)) {
-            // Get old session ID first
-            $oldSessionId = $request->session()->getId();
+        // Attempt login
+        if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
 
-            // Regenerate session (prevents fixation attacks)
+            // Regenerate session to prevent fixation
             $request->session()->regenerate();
 
-            // Merge guest cart using old session id
-            $this->mergeGuestCart($oldSessionId);
+            // Get the authenticated user
+            $user = Auth::user();
 
-            $successMessage = 'Sign-in successful, welcome back ' . Auth::user()->first_name . '!';
-            return redirect()->intended(route('customer.home'))->with('success', $successMessage);
-        } else {
-            // Authentication failed
-            return back()->withErrors([
-                'email' => 'The provided credentials do not match our records.',
-            ])->onlyInput('email');
+            // Check if the user is admin
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.product-management')->with('success', 'Welcome Admin ' . $user->first_name . '!');
+            } else {
+                // Merge guest cart for regular users
+                $oldSessionId = $request->session()->getId();
+                $this->mergeGuestCart($oldSessionId);
+
+                return redirect()->intended(route('customer.home'))
+                    ->with('success', 'Welcome back ' . $user->first_name . '!');
+            }
         }
+
+        // Authentication failed
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
+
 
     // Log out
     public function logout(Request $request){

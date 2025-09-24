@@ -50,3 +50,62 @@
 .btn-danger:hover {
     background-color: #e03b3b !important;
 }
+
+/* Pagination Container */
+.om-pagination {
+    margin: 30px 0;
+    display: flex;
+    justify-content: center;
+}
+
+/* Align text + links in center */
+.om-pagination .pagination {
+    justify-content: center;
+    font-size: 1.05rem;
+    /* Slightly larger text */
+}
+
+/* Active page */
+.om-pagination .page-item.active .page-link {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 1.1rem;
+    /* Bigger active text */
+    padding: 10px 18px;
+    /* Bigger button */
+}
+
+/* Default links */
+.om-pagination .page-link {
+    color: var(--text);
+    border-radius: 10px;
+    /* Softer corners */
+    margin: 0 6px;
+    padding: 10px 18px;
+    /* Bigger buttons */
+    font-size: 1.05rem;
+    /* Larger text */
+    border: 1px solid var(--primary);
+    background-color: var(--white);
+    transition: background 0.2s, color 0.2s, border 0.2s, transform 0.1s;
+}
+
+/* Hover state */
+.om-pagination .page-link:hover {
+    background-color: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+    transform: scale(1.05);
+    /* Subtle grow on hover */
+}
+
+/* Disabled state */
+.om-pagination .page-item.disabled .page-link {
+    color: #bbb;
+    border-color: #ddd;
+    background-color: #f1f1f1;
+    font-size: 1.05rem;
+    padding: 10px 18px;
+}

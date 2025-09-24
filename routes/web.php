@@ -111,20 +111,39 @@ Route::get('/orders/{order}', [OrderController::class, 'showOrderDetails'])->nam
 
 
 // Review Routes
-Route::post('/products/{product_id}/reviews', [ReviewController::class, 'store'])->name('customer.reviews.store');
+Route::post('/products/{product_id}/reviews', [ReviewController::class, 'store'])->name('customer.reviews.store')->middleware('auth');
 
 
 
 // Wishlists Routes
-Route::post('/wishlist/add/{productId}', [WishlistController::class, 'add'])->name('customer.wishlist.add');
+Route::post('/wishlist/add/{productId}', [WishlistController::class, 'add'])->name('customer.wishlist.add')->middleware('auth');
 
-Route::delete('/wishlist/remove/{productId}', [WishlistController::class, 'remove'])->name('customer.wishlist.remove');
+Route::delete('/wishlist/remove/{productId}', [WishlistController::class, 'remove'])->name('customer.wishlist.remove')->middleware('auth');
 
-Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist.index');
+Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist.index')->middleware('auth');
 
 
 
 // Customer Supoprt Routes
 
 Route::get('/customer-support', [SupportTicketController::class, 'index'])->name('customer.customer-support.index');
-Route::post('/customer-support', [SupportTicketController::class, 'store'])->name('customer.customer-support.store');
+Route::post('/customer-support', [SupportTicketController::class, 'store'])->name('customer.customer-support.store')->middleware('auth');
+
+
+
+
+// ADMIN ROUTES
+
+// Product Management page
+Route::get('/admin/products/management', [ProductController::class, 'showProductManagement'])->name('admin.product-management')->middleware('auth');
+
+Route::get('/admin/products/create', [ProductController::class, 'create'])->name('admin.products.create')->middleware('auth');
+Route::post('/admin/products/store', [ProductController::class, 'store'])->name('admin.products.store')->middleware('auth');
+Route::get('/admin/products/{product}', [ProductController::class, 'show'])->name('admin.show')->middleware('auth');
+Route::get('/admin/products/{product}/edit', [ProductController::class, 'edit'])->name('admin.products.edit')->middleware('auth');
+Route::put('/admin/products/{product}', [ProductController::class, 'update'])->name('admin.products.update')->middleware('auth');
+Route::delete('/admin/products/{product}', [ProductController::class, 'destroy'])->name('admin.products.destroy')->middleware('auth');
+
+
+// Order Management page
+Route::get('/admin/orders/management', [OrderController::class, 'showOrderManagement'])->name('admin.order-management')->middleware('auth');
