@@ -27,6 +27,10 @@ Route::get('/products/filter', [ProductController::class, 'filterProducts'])->na
 
 
 
+// Google OAuth Routes
+Route::get('auth/google', [AuthController::class, 'redirectToGoogle'])->name('google.redirect');
+Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+
 
 
 // Sign in Page
@@ -103,6 +107,9 @@ Route::post('/place-order', [OrderController::class, 'placeOrder'])->name('custo
 
 // Route to display a single order's details
 Route::get('/orders/{order}', [OrderController::class, 'showOrderDetails'])->name('customer.orderDetails')->middleware('auth');
+
+//PayMongo Payement Page
+Route::get('checkout/payment/{order}', [OrderController::class, 'paymentPage'])->name('customer.checkout.payment');
 
 
 // // Resourceful routes for products (CRUD)

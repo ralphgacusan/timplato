@@ -54,7 +54,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Gender</label>
-                                <select class="form-select" name="gender" required>
+                                <select class="form-select" name="gender">
                                     <option value="male" {{ Auth::user()->gender == 'male' ? 'selected' : '' }}>Male
                                     </option>
                                     <option value="female" {{ Auth::user()->gender == 'female' ? 'selected' : '' }}>
@@ -66,7 +66,7 @@
                             <div class="col-md-6">
                                 <label class="form-label">Date of Birth</label>
                                 <input type="date" class="form-control" name="date_of_birth"
-                                    value="{{ Auth::user()->date_of_birth?->format('Y-m-d') }}" required>
+                                    value="{{ Auth::user()->date_of_birth?->format('Y-m-d') }}">
                             </div>
                         </div>
 

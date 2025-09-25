@@ -9,9 +9,32 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
+use App\Services\PayMongoService;
 
 class OrderController extends Controller
 {
+
+    // PayMongo
+    protected $paymongo;
+
+    public function __construct(PayMongoService $paymongo)
+    {
+        $this->paymongo = $paymongo;
+    }
+
+    public function paymentPage(Order $order)
+    {
+        $user = Auth::user();
+        if ($order->user_id !== $user->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        return view('customer.paymongo-payment', [
+            'order' => $order
+        ]);
+    }
+
+
     // Checkout page for full cart
     public function checkoutCart()
     {
@@ -43,72 +66,86 @@ class OrderController extends Controller
 
     // Place the order
     public function placeOrder(Request $request)
-{
-    $request->validate([
-        'paymentMethod' => 'required|string',
-        'deliveryMethod' => 'required|string',
-        'items' => 'required|array',
-        'coupon' => 'nullable|string',
-    ]);
-
-    $user = Auth::user();
-    $items = collect($request->items);
-
-    $subtotal = $items->sum(fn($i) => $i['price'] * $i['quantity']);
-
-    // Delivery fee
-    $deliveryFees = [
-        'Premium Delivery' => 100,
-        'Named Day Delivery' => 150,
-        'Standard Delivery' => 0,
-    ];
-    $deliveryFee = $deliveryFees[$request->deliveryMethod] ?? 0;
-
-    // Voucher/discount logic
-    $discount = 0;
-    $voucher = strtoupper($request->coupon ?? '');
-    if ($voucher === 'ALDEN50') {
-        $discount = 50;
-    } elseif ($voucher === 'DEENICE10P') {
-        $discount = ($subtotal + $deliveryFee) * 0.10;
-    } elseif ($voucher === 'JOMSPOGI100') {
-        $discount = 100;
-    } elseif ($voucher === 'BAYUCAN20P') {
-        $discount = ($subtotal + $deliveryFee) * 0.20;
-    } elseif ($voucher === 'GACUSAN30') {
-        $discount = ($subtotal + $deliveryFee) * 0.30;
-    }
-
-    $totalAmount = $subtotal + $deliveryFee - $discount;
-
-    $order = Order::create([
-    'user_id' => $user->id,
-    'total_amount' => $totalAmount,
-    'current_status' => 'pending',
-    'payment_method' => $request->paymentMethod,
-    'discount_amount' => $discount,  // <-- changed from 'discount'
-    'voucher_code' => $voucher ?: null, // this is fine
-]);
-
-    foreach ($items as $item) {
-        OrderItem::create([
-            'order_id' => $order->order_id,
-            'product_id' => $item['product_id'],
-            'quantity' => $item['quantity'],
-            'price' => $item['price'],
+    {
+        $request->validate([
+            'paymentMethod' => 'required|string',
+            'deliveryMethod' => 'required|string',
+            'items' => 'required|array',
+            'coupon' => 'nullable|string',
         ]);
+
+        $user = Auth::user();
+        $items = collect($request->items);
+
+        $subtotal = $items->sum(fn($i) => $i['price'] * $i['quantity']);
+
+        // Delivery fee
+        $deliveryFees = [
+            'Premium Delivery' => 100,
+            'Named Day Delivery' => 150,
+            'Standard Delivery' => 0,
+        ];
+        $deliveryFee = $deliveryFees[$request->deliveryMethod] ?? 0;
+
+        // Voucher/discount logic
+        $discount = 0;
+        $voucher = strtoupper($request->coupon ?? '');
+        if ($voucher === 'ALDEN50') {
+            $discount = 50;
+        } elseif ($voucher === 'DEENICE10P') {
+            $discount = ($subtotal + $deliveryFee) * 0.10;
+        } elseif ($voucher === 'JOMSPOGI100') {
+            $discount = 100;
+        } elseif ($voucher === 'BAYUCAN20P') {
+            $discount = ($subtotal + $deliveryFee) * 0.20;
+        } elseif ($voucher === 'GACUSAN30') {
+            $discount = ($subtotal + $deliveryFee) * 0.30;
+        }
+
+        $totalAmount = $subtotal + $deliveryFee - $discount;
+
+        
+
+        $order = Order::create([
+            'user_id' => $user->id,
+            'total_amount' => $totalAmount,
+            'current_status' => 'pending',
+            'payment_method' => $request->paymentMethod,
+            'discount_amount' => $discount,  // <-- changed from 'discount'
+            'voucher_code' => $voucher ?: null, // this is fine
+        ]);
+
+        foreach ($items as $item) {
+            OrderItem::create([
+                'order_id' => $order->order_id,
+                'product_id' => $item['product_id'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price'],
+            ]);
+        }
+
+        if ($request->paymentMethod !== 'COD') {
+            $paymentIntent = $this->paymongo->createPaymentIntent($totalAmount);
+
+            // Save the client_secret in your order for front-end use
+            $order->payment_intent_id = $paymentIntent['data']['id'] ?? null;
+            $order->client_secret = $paymentIntent['data']['attributes']['client_key'] ?? null;
+            $order->save();
+
+            // Redirect user to payment page or return JSON to frontend
+            return redirect()->route('customer.checkout.payment', $order->order_id);
+        }
+
+        $cart = Cart::where('user_id', $user->id)->first();
+
+        if ($cart) {
+        $orderedProductIds = $items->pluck('product_id');
+
+        $cart->items()->whereIn('product_id', $orderedProductIds)->delete();
     }
 
-    $cart = Cart::where('user_id', $user->id)->first();
-
-    if ($cart) {
-    $orderedProductIds = $items->pluck('product_id');
-
-    $cart->items()->whereIn('product_id', $orderedProductIds)->delete();
-}
-
-    return redirect()->route('customer.home')->with('success', 'Order placed successfully!');
-}
+        return redirect()->route('customer.home')->with('success', 'Order placed successfully!');
+    }
 
 // Display Order Details
 public function showOrderDetails(Order $order)

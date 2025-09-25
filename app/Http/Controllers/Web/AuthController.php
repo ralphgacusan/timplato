@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -28,6 +29,58 @@ class AuthController extends Controller
     public function signinPage(){
         return view('auth.sign-in');
     }
+
+
+    // OAuth Functions
+
+    // Redirect user to Google
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    // Handle Google callback
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+
+            // Find existing user or create new
+            $user = User::firstOrCreate(
+                ['email' => $googleUser->getEmail()],
+                [
+                    'first_name' => $googleUser->user['given_name'] ?? $googleUser->getName(),
+                    'last_name'  => $googleUser->user['family_name'] ?? '',
+                    'password'   => Hash::make(uniqid()),
+                    'role'       => 'user',
+                    'gender'     => null,
+                    'date_of_birth' => null,
+                    'phone'      => null,
+                ]
+            );
+
+            // Log the user in
+            Auth::login($user);
+
+            // Redirect based on role (same as signin logic)
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.product-management')
+                    ->with('success', 'Welcome Admin ' . $user->first_name . '!');
+            }
+
+            // Decide message based on sign in vs sign up
+            $message = $user->wasRecentlyCreated
+                ? 'Registration successful! Welcome, ' . $user->first_name . '!'
+                : 'Welcome back ' . $user->first_name . '!';
+            
+            return redirect()->route('customer.home')->with('success', $message);
+
+        } catch (\Exception $e) {
+            return redirect()->route('login')
+                ->withErrors(['oauth' => 'Something went wrong, please try again.']);
+        }
+    }
+
 
     
 
@@ -71,11 +124,11 @@ class AuthController extends Controller
                 'in:user,admin',
             ],
             'gender' => [
-                'required',
+                'nullable',
                 'in:male,female,prefer_not_to_say',
             ],
             'date_of_birth' => [
-                'required',
+                'nullable',
                 'date',
                 'before:today', // Optional: ensures DOB is in the past
             ],
@@ -221,8 +274,8 @@ class AuthController extends Controller
             'last_name' => 'required|string|max:50|regex:/^[A-Za-z\s\-]+$/',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|regex:/^\+?[0-9]{11,13}$/',
-            'gender' => 'required|in:male,female,other',
-            'date_of_birth' => 'required|date|before:today',
+            'gender' => 'nullable|in:male,female,other',
+            'date_of_birth' => 'nullable|date|before:today',
             'profile_photo' => 'nullable|image|max:2048', // optional photo, max 2MB
         ];
 

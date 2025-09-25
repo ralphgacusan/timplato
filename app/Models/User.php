@@ -63,7 +63,7 @@ public function wishlistProducts()
         return trim("{$this->first_name} {$this->last_name}");
     }
 
-    public function getFullAddress(): string
+    public function getFullAddress(): ?string
     {
         // Try to get default address
         $defaultAddress = $this->addresses()->where('is_default', 1)->first();
@@ -77,7 +77,7 @@ public function wishlistProducts()
             return "{$defaultAddress->address}, {$defaultAddress->city}, {$defaultAddress->state} {$defaultAddress->zip_code}, {$defaultAddress->country}";
         }
 
-        return "Address not set";
+        return null; // <-- return null instead of "Address not set"
     }
 
 

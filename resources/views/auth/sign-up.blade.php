@@ -70,7 +70,7 @@
                         <div class="formGroup">
                             <label for="phone" class="formLabel">Phone Number</label>
                             <input type="tel" id="phone" name="phone" class="formInput"
-                                placeholder="Enter your phone number" value="{{ old('phone') }}" required>
+                                placeholder="Enter your phone number" value="{{ old('phone') }}">
                             @error('phone')
                                 <span class="error-message" style="color:red; font-size:0.7rem;">{{ $message }}</span>
                             @enderror
@@ -142,19 +142,26 @@
                     <!-- Buttons -->
                     <div class="formRow buttonsRow">
                         <button type="submit" class="formButton">Sign Up</button>
-                        <button type="button" class="formButton googleButton">
-                            <img src="{{ asset('Assets/google_logo.webp') }}" alt="Google" class="googleIcon">
-                            Sign
-                            Up
-                            with Google
-                        </button>
+
                     </div>
 
                 </form>
-                <p class="signupPrompt">Already have an account? <a href="{{ route('login') }}"
-                        class="signupLink">Login</a>
-                </p>
+
+                <div class="formRow buttonsRow">
+
+                    <!-- Google Sign Up (separate form) -->
+                    <form action="{{ route('google.redirect') }}" method="GET">
+                        <button type="submit" class="formButton googleButton">
+                            <img src="{{ asset('Assets/google_logo.webp') }}" alt="Google" class="googleIcon">
+                            Sign Up with Google
+                        </button>
+                    </form>
+                    <p class="signupPrompt">Already have an account? <a href="{{ route('login') }}"
+                            class="signupLink">Login</a>
+                    </p>
+                </div>
             </div>
+
         </header>
     </div>
 

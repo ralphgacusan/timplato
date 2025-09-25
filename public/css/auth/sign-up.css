@@ -153,6 +153,11 @@
     /* space between buttons */
     align-items: center;
     width: 100%;
+
+}
+
+.buttonsRow form {
+    width: 100%;
 }
 
 /* All buttons in this row same width as input fields */
@@ -166,6 +171,7 @@
 /* Google button style */
 .googleButton {
     background: #ffffff;
+    width: 100%;
     color: #000;
     border: 1px solid #bdbdbd;
     display: flex;

@@ -16,15 +16,33 @@
             <!-- Left: Delivery & Order -->
             <div class="col-lg-7">
                 <!-- Delivery Address -->
-                <div class="checkout-section checkout-section-address mb-4 p-4 rounded shadow-sm">
-                    <div class="mb-2 fw-semibold">Delivery Address</div>
-                    <div>
-                        <span class="fw-semibold">{{ Auth::user()->getFullName() }}</span> |
-                        <span class="text-muted">{{ Auth::user()->phone ?? '+63' }}</span> |
-                        {{ Auth::user()->getFullAddress() ?? 'Address not set' }}
-                        <span class="badge bg-secondary">Default</span>
+
+                <a href="{{ route('auth.user-profile') }}" class="text-decoration-none text-reset">
+
+                    <div class="checkout-section checkout-section-address mb-4 p-4 rounded shadow-sm">
+                        <div class="mb-2 fw-semibold">Delivery Details</div>
+                        <div>
+                            <span class="fw-semibold">{{ Auth::user()->getFullName() }}</span> |
+
+                            {{-- Phone check --}}
+                            @if (!empty(Auth::user()->phone))
+                                <span class="text-muted">{{ Auth::user()->phone }}</span> |
+                            @else
+                                <span class="text-danger fw-semibold">⚠ Please provide a phone number</span>
+                            @endif
+
+                            {{-- Address check --}}
+                            @if (!empty(Auth::user()->getFullAddress()))
+                                {{ Auth::user()->getFullAddress() }}
+                                <span class="badge bg-secondary">Default</span>
+                            @else
+                                <br>
+                                <span class="text-danger fw-semibold">⚠ Please provide a delivery address</span>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                </a>
+
 
                 <!-- Products Ordered -->
                 <div class="checkout-section mb-4 p-4 rounded shadow-sm" style="background:#fff;">
@@ -167,7 +185,16 @@
                         <span id="totalPayment">₱{{ number_format($subtotal, 2) }}</span>
                     </div>
 
-                    <button class="btn btn-warning w-100 fw-semibold">PLACE ORDER</button>
+                    @if (!Auth::user()->getFullAddress() || !Auth::user()->phone)
+                        <button class="btn btn-warning w-100 fw-semibold" disabled>
+                            PLACE ORDER
+                        </button>
+                    @else
+                        <button class="btn btn-warning w-100 fw-semibold">
+                            PLACE ORDER
+                        </button>
+                    @endif
+
                 </form>
             </div>
         </div>

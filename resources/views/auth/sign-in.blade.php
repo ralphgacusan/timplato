@@ -36,9 +36,12 @@
 
                     <a href="#forgot-password" class="forgotPasswordLink">Forgot Password?</a>
                     <button type="submit" class="formButton">Login</button>
-                    <button type="button" class="formButton googleButton">
-                        <img src="{{ asset('Assets/google_logo.webp') }}" alt="Google" class="googleIcon"> Log in with
-                        Google
+
+                </form>
+                <form action="{{ route('google.redirect') }}" method="GET">
+                    <button type="submit" class="formButton googleButton">
+                        <img src="{{ asset('Assets/google_logo.webp') }}" alt="Google" class="googleIcon">
+                        Log in with Google
                     </button>
                 </form>
                 <p class="signupPrompt">Don't have an account? <a href="{{ route('auth.signup') }}"
