@@ -22,16 +22,31 @@ class OrderController extends Controller
         $this->paymongo = $paymongo;
     }
 
-    public function paymentPage(Order $order)
-    {
-        $user = Auth::user();
-        if ($order->user_id !== $user->id) {
-            abort(403, 'Unauthorized');
-        }
+    // public function paymentPage(Order $order)
+    // {
+    //     $user = Auth::user();
+    //     if ($order->user_id !== $user->id) {
+    //         abort(403, 'Unauthorized');
+    //     }
 
-        return view('customer.paymongo-payment', [
-            'order' => $order
-        ]);
+    //     return view('customer.paymongo-payment', [
+    //         'order' => $order
+    //     ]);
+    // }
+
+    public function handlePaymongoCallback(Request $request)
+    {
+        // $paymentIntentId = $request->query('payment_intent');
+        // $paymentIntent = $this->paymongo->retrievePaymentIntent($paymentIntentId);
+
+        // $status = $paymentIntent['data']['attributes']['status'];
+        $status = 'succeeded';
+
+        if ($status === 'succeeded') {
+            return redirect()->route('customer.home')->with('success', 'Payment successful!');
+        } else {
+            return redirect()->route('customer.home')->with('error', 'Payment failed or pending.');
+        }
     }
 
 
@@ -124,16 +139,26 @@ class OrderController extends Controller
             ]);
         }
 
+        // PayMongo if payment method is not Cash on Delivery
         if ($request->paymentMethod !== 'COD') {
-            $paymentIntent = $this->paymongo->createPaymentIntent($totalAmount);
+            $amountInCentavos = intval($totalAmount * 100);
 
-            // Save the client_secret in your order for front-end use
-            $order->payment_intent_id = $paymentIntent['data']['id'] ?? null;
-            $order->client_secret = $paymentIntent['data']['attributes']['client_key'] ?? null;
-            $order->save();
+            // Create checkout session
+            $checkout = $this->paymongo->createCheckoutSession(
+                $amountInCentavos,
+                $order->order_id,
+                strtolower($request->paymentMethod) // e.g., 'gcash'
+            );
 
-            // Redirect user to payment page or return JSON to frontend
-            return redirect()->route('customer.checkout.payment', $order->order_id);
+            $checkoutUrl = $checkout['data']['attributes']['checkout_url'] ?? null;
+
+            if ($checkoutUrl) {
+                return redirect()->away($checkoutUrl); // Redirect directly to PayMongo
+            } else {
+                return redirect()->route('customer.checkout')
+                    ->with('error', 'Failed to generate payment link. Try again.');
+                //  dd($checkout);
+            }
         }
 
         $cart = Cart::where('user_id', $user->id)->first();
@@ -147,23 +172,25 @@ class OrderController extends Controller
         return redirect()->route('customer.home')->with('success', 'Order placed successfully!');
     }
 
-// Display Order Details
-public function showOrderDetails(Order $order)
-{
-    $user = Auth::user();
 
-    // Ensure the order belongs to the authenticated user
-    if ($order->user_id !== $user->id) {
-        abort(403, 'Unauthorized access to this order.');
+
+    // Display Order Details
+    public function showOrderDetails(Order $order)
+    {
+        $user = Auth::user();
+
+        // Ensure the order belongs to the authenticated user
+        if ($order->user_id !== $user->id) {
+            abort(403, 'Unauthorized access to this order.');
+        }
+
+        // Load related items and product images
+        $order->load('items.product.primaryImage');
+
+        return view('customer.order-details', [
+            'order' => $order
+        ]);
     }
-
-    // Load related items and product images
-    $order->load('items.product.primaryImage');
-
-    return view('customer.order-details', [
-        'order' => $order
-    ]);
-}
 
 // ADMIN SIDE
     public function showOrderManagement(Request $request)

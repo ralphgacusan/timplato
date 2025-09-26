@@ -111,6 +111,8 @@ Route::get('/orders/{order}', [OrderController::class, 'showOrderDetails'])->nam
 //PayMongo Payement Page
 Route::get('checkout/payment/{order}', [OrderController::class, 'paymentPage'])->name('customer.checkout.payment');
 
+Route::get('payment/paymongo/callback', [OrderController::class, 'handlePaymongoCallback'])->name('paymongo.callback');
+
 
 // // Resourceful routes for products (CRUD)
 // Route::resource('products', ProductController::class);

@@ -18,10 +18,12 @@
                         <span class="fw-semibold">₱{{ number_format($order->total_amount, 2) }}</span>
                     </div>
 
+
+
                     <div class="d-grid mb-3">
-                        <button id="payBtn" class="btn btn-warning btn-lg fw-semibold">
+                        <a href="{{ $paymongoURL }}" id="payBtn" class="btn btn-warning btn-lg fw-semibold">
                             Pay Now
-                        </button>
+                        </a>
                     </div>
 
                     <p class="text-muted text-center" style="font-size:0.9rem;">
@@ -33,35 +35,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.paymongo.com/pay.js"></script>
-    <script>
-        const payBtn = document.getElementById('payBtn');
 
-        payBtn.addEventListener('click', async () => {
-            const clientKey = "{!! $order->client_secret !!}";
-
-            // Debug: check the client key
-            console.log('Client Key:', clientKey);
-
-            if (!clientKey) {
-                console.error('Client Key is null or empty!');
-                alert('Payment cannot proceed: client key missing.');
-                return;
-            }
-
-            try {
-                console.log('Opening PayMongo payment modal...');
-                const payment = Paymongo.pay(clientKey, {
-                    return_url: "{{ route('customer.home') }}"
-                });
-
-                payment.open();
-                console.log('PayMongo modal should be open now.');
-            } catch (error) {
-                console.error('Error opening PayMongo modal:', error);
-                alert('Something went wrong while opening payment. Check console.');
-            }
-        });
-    </script>
 
 </x-customer-layout>
