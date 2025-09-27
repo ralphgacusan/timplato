@@ -22,6 +22,7 @@ return new class extends Migration
             $table->enum('role', ['user', 'admin']); // User role
             $table->enum('gender', ['male', 'female', 'prefer_not_to_say'])->nullable(); // Gender           
             $table->date('date_of_birth')->nullable(); // Date of birth
+            $table->timestamp('last_login_at')->nullable();
             $table->timestamps(); // created_at and updated_at
         });
 

@@ -13,6 +13,10 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
 
+    protected $casts = [
+    'last_login_at' => 'datetime',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -28,6 +32,7 @@ class User extends Authenticatable
         'role',
         'gender',
         'date_of_birth',
+        'last_login_at',
     ];
 
     public function addresses()
@@ -40,15 +45,17 @@ class User extends Authenticatable
         return $this->hasMany(Wishlist::class, 'user_id', 'id');
     }
 
-    public function wishlistItems()
-{
-    return $this->hasMany(\App\Models\Wishlist::class, 'user_id', 'id');
-}
+    
 
-public function wishlistProducts()
-{
-    return $this->belongsToMany(\App\Models\Product::class, 'wishlists', 'user_id', 'product_id', 'id', 'product_id');
-}
+    public function wishlistItems()
+    {
+        return $this->hasMany(\App\Models\Wishlist::class, 'user_id', 'id');
+    }
+
+    public function wishlistProducts()
+    {
+        return $this->belongsToMany(\App\Models\Product::class, 'wishlists', 'user_id', 'product_id', 'id', 'product_id');
+    }
 
 
 
@@ -82,9 +89,9 @@ public function wishlistProducts()
 
 
     public function notifications()
-{
-    return $this->hasMany(Notification::class, 'user_id');
-}
+    {
+        return $this->hasMany(Notification::class, 'user_id');
+    }
 
 
     /**

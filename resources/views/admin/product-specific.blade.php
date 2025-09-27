@@ -38,18 +38,7 @@
                     </div>
                 </div>
 
-                <h4>Stocks and Pricing</h4>
-
-                <div class="quantity-restock-row">
-                    <div class="input-group">
-                        <label>Quantity</label>
-                        <p>{{ $product->stock_quantity }}</p>
-                    </div>
-                    <div class="input-group">
-                        <label>Restock Level</label>
-                        <p>{{ $product->restock_level }}</p>
-                    </div>
-                </div>
+                <h4>Pricing and Stocks</h4>
 
                 <div class="quantity-restock-row">
                     <div class="input-group">
@@ -57,7 +46,19 @@
                         <p>₱ {{ number_format($product->price, 2) }}</p>
                     </div>
                     <div class="input-group">
+                        <label>Stock Quantity</label>
+                        <p>{{ $product->stock_quantity }}</p>
+                    </div>
+                </div>
 
+                <div class="quantity-restock-row">
+                    <div class="input-group">
+                        <label>Sold</label>
+                        <p>{{ $product->sold }}</p>
+                    </div>
+                    <div class="input-group">
+                        <label>Restock Level</label>
+                        <p>{{ $product->restock_level }}</p>
                     </div>
                 </div>
 

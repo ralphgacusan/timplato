@@ -150,7 +150,7 @@
                 <div class="image-upload-scroll">
                     <div class="image-upload-list" id="imageUploadList">
                         @foreach ($product->images as $img)
-                            <div class="preview-item" data-image-id="{{ $img->id }}">
+                            <div class="preview-item" data-image-id="{{ $img->image_id }}">
                                 <span class="preview-number">{{ $loop->iteration }}</span>
                                 <button type="button" class="remove-btn"
                                     data-index="{{ $loop->index }}">&times;</button>

@@ -28,7 +28,10 @@ class PayMongoService
                     ]],
                     'payment_method_types' => [$paymentMethod], // e.g., 'gcash', 'card'
                     'success_url' => route('paymongo.callback', ['order' => $orderId]),
-                    'cancel_url' => route('customer.orderDetails', $orderId),
+                    'cancel_url' => route('customer.orderDetails', [
+                        'order' => $orderId, // required route parameter
+                        'error' => 'Payment was canceled for Order #' . $orderId, // optional query string
+                    ]),                
                 ]
             ]
         ];

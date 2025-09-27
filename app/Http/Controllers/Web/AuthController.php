@@ -185,6 +185,9 @@ class AuthController extends Controller
             // Get the authenticated user
             $user = Auth::user();
 
+            // Update last login
+            $user->update(['last_login_at' => now()]);
+
             // Check if the user is admin
             if ($user->role === 'admin') {
                 return redirect()->route('admin.product-management')->with('success', 'Welcome Admin ' . $user->first_name . '!');
@@ -330,6 +333,64 @@ class AuthController extends Controller
             }
             $guestCart->delete();
         }
+    }
+
+
+    // ADMIN SIDE
+   public function showUserManagement(Request $request)
+    {
+        $query = User::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                ->orWhere('last_name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        // Role filter
+        if ($request->filled('role')) {
+            $query->where('role', $request->input('role'));
+        }
+
+        // Sorting
+        switch ($request->input('sort')) {
+            case 'az':
+                $query->orderByRaw("CONCAT(first_name, ' ', last_name) ASC");
+                break;
+            case 'za':
+                $query->orderByRaw("CONCAT(first_name, ' ', last_name) DESC");
+                break;
+            case 'newest':
+                $query->orderBy('created_at', 'desc');
+                break;
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'last-login':
+                $query->orderBy('last_login_at', 'desc');
+                break;
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        // Pagination
+        $users = $query->paginate(30)->appends($request->query());
+
+        return view('admin.user-management', compact('users'));
+    }
+
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()->route('admin.user-management')->with('success', 'User deleted successfully.');
     }
 
 

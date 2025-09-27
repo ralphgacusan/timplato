@@ -27,13 +27,15 @@ return new class extends Migration
                 'processing',  // preparing / being packed
                 'shipped',     // handed over to courier
                 'delivered',   // successfully received by customer
+                'cancel_requested', // customer requested cancellation
                 'cancelled',   // cancelled by user or admin
                 'returned',    // returned by customer
                 'refunded',    // refunded to customer
             ])->default('pending');            
             $table->string('payment_method'); // cod, gcash, credit_card, etc.
             $table->string('tracking_number')->nullable();
-
+            $table->text('cancel_reason')->nullable();
+            $table->timestamp('cancel_requested_at')->nullable();
             $table->timestamps(); // created_at & updated_at
 
             // Foreign key constraints

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\StockTransaction;
+
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
@@ -282,8 +285,8 @@ class ProductController extends Controller
 
         // Handle deleted images
         if ($request->filled('deleted_images')) {
-            $deletedIds = explode(',', $request->deleted_images);
-            $imagesToDelete = $product->images()->whereIn('id', $deletedIds)->get();
+            $deletedIds = array_filter(explode(',', $request->deleted_images)); // filter out blanks
+            $imagesToDelete = $product->images()->whereIn('image_id', $deletedIds)->get();
 
             foreach ($imagesToDelete as $img) {
                 $filePath = public_path('images/' . $img->image_url);
@@ -311,6 +314,7 @@ class ProductController extends Controller
 
         return redirect()->route('admin.product-management')
                         ->with('success', 'Product updated successfully!');
+        // dd($request->deleted_images);
     }
 
 
@@ -342,6 +346,123 @@ class ProductController extends Controller
             'images.*.is_primary' => 'boolean',
         ];
     }
+
+
+
+
+   // Inventory Management
+   
+   public function showInventoryManagement(Request $request)
+    {
+        $query = Product::with(['category', 'latestStockTransaction']);
+
+        // Search by product name
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter by stock status
+        if ($request->filled('status')) {
+            switch ($request->status) {
+                case 'in-stock':
+                    $query->where('stock_quantity', '>', 5); // adjust threshold
+                    break;
+                case 'low-stock':
+                    $query->whereBetween('stock_quantity', [1, 5]);
+                    break;
+                case 'out-of-stock':
+                    $query->where('stock_quantity', 0);
+                    break;
+            }
+        }
+
+        // Sorting
+        switch ($request->sort) {
+            case 'name-asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name-desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'stock-asc':
+                $query->orderBy('stock_quantity', 'asc');
+                break;
+            case 'stock-desc':
+                $query->orderBy('stock_quantity', 'desc');
+                break;
+            case 'latest-restock':
+                $query->orderByDesc(
+                    StockTransaction::select('created_at')
+                        ->whereColumn('product_id', 'products.product_id')
+                        ->latest()
+                );
+                break;
+            default:
+                $query->orderBy('product_id', 'desc');
+                break;
+        }
+
+        $products = $query->paginate(30)->withQueryString();
+
+        return view('admin.inventory-management', compact('products'));
+    }
+
+
+
+
+
+    // Handle Adjust Stock (Add or Deduct)
+    public function updateStock(Request $request, Product $product)
+    {
+        $request->validate([
+            'quantity' => 'required|integer',
+            'type' => 'required|in:add,deduct',
+        ]);
+
+        if ($request->type === 'add') {
+            $product->stock_quantity += $request->quantity;
+        } else {
+            $product->stock_quantity -= $request->quantity;
+        }
+
+        $product->save();
+
+        // Record stock transaction
+        StockTransaction::create([
+            'product_id' => $product->product_id,
+            'type' => $request->type,
+            'quantity' => $request->quantity,
+            'performed_by' => Auth::user()->getFullName(), // store full name of auth user
+        ]);
+
+        return redirect()->route('admin.inventory-management')->with('success', 'Stock updated successfully.');
+    }
+
+    public function viewStockHistory(Product $product)
+    {
+        $transactions = StockTransaction::where('product_id', $product->product_id)
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+
+        return view('admin.inventory-history', compact('product', 'transactions'));
+    }
+
+    // // View Stock History
+    // public function stockHistory(Product $product)
+    // {
+    //     $transactions = StockTransaction::where('product_id', $product->product_id)
+    //         ->latest()
+    //         ->paginate(10);
+
+    //     return view('admin.inventory.history', compact('product', 'transactions'));
+    // }
+
+    // // Delete product (optional)
+    // public function destroy(Product $product)
+    // {
+    //     $product->delete();
+    //     return redirect()->route('admin.inventory.index')->with('success', 'Product deleted successfully.');
+    // }
 
 
 }

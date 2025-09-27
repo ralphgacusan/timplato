@@ -3,6 +3,7 @@
 
     @push('styles')
         <link rel="stylesheet" href="{{ asset('css/auth/user-profile.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/customer/review-modal.css') }}">
     @endpush
 
     <div class="container py-5">
@@ -171,10 +172,9 @@
                                 <div class="tab-content {{ $loop->first ? 'active' : '' }}"
                                     data-content="{{ $status }}">
                                     @forelse ($groupedOrders[$status] ?? [] as $order)
-                                        <a href="{{ route('customer.orderDetails', $order->order_id) }}"
-                                            class="order-card-link text-decoration-none">
-                                            <div class="order-card p-3 mb-3 shadow-sm rounded">
-
+                                        <div class="order-card p-3 mb-3 shadow-sm rounded">
+                                            <a href="{{ route('customer.orderDetails', $order->order_id) }}"
+                                                class="order-card-link text-decoration-none">
                                                 <div class="order-header d-flex justify-content-between mb-2">
                                                     <span class="store fw-bold">Timplato</span>
                                                     <div class="order-actions">
@@ -209,7 +209,8 @@
                                                 {{-- Status --}}
                                                 <div class="order-status text-end mb-2">
                                                     <div class="delivered text-primary fw-bold">
-                                                        {{ ucfirst($order->current_status) }}</div>
+                                                        {{ ucwords(str_replace('_', ' ', $order->current_status)) }}
+                                                    </div>
                                                 </div>
 
                                                 {{-- Footer --}}
@@ -219,32 +220,97 @@
                                                         Order Total: ₱{{ number_format($order->total_amount, 2) }}
                                                     </div>
                                                 </div>
+                                            </a>
+                                            <div class="order-actions-main d-flex gap-2 justify-content-end">
+                                                @php $status = $order->current_status; @endphp
 
-                                                <div class="order-actions-main d-flex gap-2 justify-content-end">
-                                                    @php $status = $order->current_status; @endphp
-
-                                                    @if ($status === 'pending')
-                                                        <button class="btn btn-dark">Cancel Order</button>
-                                                    @elseif (in_array($status, ['confirmed', 'processing']))
-                                                        <button class="btn btn-warning">Track Order</button>
-                                                    @elseif (in_array($status, ['shipped', 'to_receive']))
-                                                        <button class="btn btn-warning">Request
-                                                            Return/Refund</button>
-                                                        <button class="btn btn-success">Order Received</button>
-                                                    @elseif (in_array($status, ['delivered', 'completed']))
-                                                        <button class="btn btn-outline-secondary">Leave a
-                                                            Review</button>
-                                                        <button class="btn btn-success">Buy Again</button>
-                                                    @elseif ($status === 'cancelled')
-                                                        <button class="btn btn-success">Buy Again</button>
-                                                    @elseif (in_array($status, ['returned', 'refunded']))
-                                                        <button class="btn btn-success">Buy Again</button>
+                                                @if ($status === 'cancel_requested')
+                                                    <button type="button" class="btn btn-dark" disabled>Cancel
+                                                        Requested</button>
+                                                @elseif ($status === 'cancelled')
+                                                    <button type="button" class="btn btn-secondary"
+                                                        disabled>Cancelled</button>
+                                                @elseif ($status === 'pending')
+                                                    {{-- Button for Not COD orders that are not yet paid --}}
+                                                    @if ($order->payment_method != 'COD')
+                                                        <form
+                                                            action="{{ route('paymongo.redirect', [
+                                                                'amount' => $order->total_amount,
+                                                                'order' => $order->order_id,
+                                                                'paymentMethod' => $order->payment_method,
+                                                            ]) }}"
+                                                            method="GET">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-warning">Pay
+                                                                Now</button>
+                                                        </form>
                                                     @endif
-                                                </div>
 
+                                                    <button type="button" class="btn btn-dark"
+                                                        onclick="document.getElementById('cancelOrderModalOverlay-{{ $order->order_id }}').style.display='flex'">
+                                                        Cancel Order
+                                                    </button>
+                                                    <!-- Cancel Order Modal -->
+                                                    <div class="modal-overlay"
+                                                        id="cancelOrderModalOverlay-{{ $order->order_id }}"
+                                                        style="display:none;">
+                                                        <div class="modal-card">
+                                                            <form
+                                                                action="{{ route('customer.orders.cancel', $order->order_id) }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                @method('PATCH')
+                                                                <div class="modal-header">
+                                                                    <h2 class="modal-product-title">Cancel Order
+                                                                        #{{ $order->order_id }}
+                                                                    </h2>
+                                                                </div>
 
+                                                                <div class="modal-body">
+                                                                    <p>Are you sure you want to request cancellation
+                                                                        for this order? The
+                                                                        seller/admin must approve it.</p>
+
+                                                                    <div class="modal-review-row">
+                                                                        <label for="cancel_reason">Reason
+                                                                            (optional)
+                                                                            :</label>
+                                                                        <textarea name="cancel_reason" id="cancel_reason" class="modal-review-text"
+                                                                            placeholder="Enter reason for cancellation"></textarea>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="modal-footer">
+                                                                    <button type="button"
+                                                                        class="modal-btn modal-cancel"
+                                                                        data-target="cancelOrderModalOverlay-{{ $order->order_id }}">Close</button>
+                                                                    <button type="submit"
+                                                                        class="modal-btn modal-submit">Request
+                                                                        Cancellation</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                @elseif (in_array($status, ['confirmed', 'processing']))
+                                                    <button class="btn btn-warning">Track Order</button>
+                                                @elseif (in_array($status, ['shipped', 'to_receive']))
+                                                    <button class="btn btn-success">Order Received</button>
+                                                @elseif (in_array($status, ['delivered', 'completed']))
+                                                    <button class="btn btn-warning">Request
+                                                        Return/Refund</button>
+                                                    <button class="btn btn-outline-secondary">Leave a
+                                                        Review</button>
+                                                    <button class="btn btn-success">Buy Again</button>
+                                                @elseif ($status === 'cancelled')
+                                                    <button class="btn btn-success">Buy Again</button>
+                                                @elseif (in_array($status, ['returned', 'refunded']))
+                                                    <button class="btn btn-success">Buy Again</button>
+                                                @endif
                                             </div>
-                                        </a>
+
+
+                                        </div>
+
                                     @empty
                                         <div class="text-center py-5">
                                             <p>No orders in this section.</p>
@@ -331,6 +397,14 @@
 
 
         <script src="{{ asset('js/customer/delivery.js') }}"></script>
-
+        <script>
+            // close button for cancl request modal
+            document.querySelectorAll('.modal-cancel').forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-target');
+                    document.getElementById(targetId).style.display = 'none';
+                });
+            });
+        </script>
     </div>
 </x-customer-layout>

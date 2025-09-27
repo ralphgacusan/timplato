@@ -35,7 +35,7 @@
             <!-- Stock Info -->
             <div class="product-stock">
                 {{-- TO FIX DISPLAY SOLD FEAUTURE --}}
-                <span>Sold: {{ $product->sold_quantity ?? 0 }}</span> |
+                <span>Sold: {{ $product->sold ?? 0 }}</span> |
                 <span>Left: {{ $product->stock_quantity }}</span> |
                 <span class="stock-status {{ $product->stock_quantity > 0 ? 'in-stock' : 'out-of-stock' }}">
                     {{ $product->stock_quantity > 0 ? 'In Stock' : 'Out of Stock' }}

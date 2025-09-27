@@ -20,7 +20,9 @@ class Order extends Model
     'payment_method',
     'tracking_number',
     'discount_amount',       // new
-    'voucher_code',   // new
+    'voucher_code',
+    'cancel_reason',
+    'cancel_requested_at',   // new
 ];
 
     /**

@@ -18,6 +18,7 @@ class Product extends Model
         'price',
         'stock_quantity',
         'restock_level',
+        'sold',
         'category_id',
     ];
 
@@ -62,6 +63,8 @@ class Product extends Model
         return $this->hasMany(Notification::class, 'product_id', 'product_id');
     }
 
+    
+
     // Category and Subcategory
 
     public function getMainCategoryAttribute()
@@ -78,6 +81,33 @@ class Product extends Model
             return $this->category->name;
         }
         return 'N/A';
+    }
+
+    // Inventory
+    public function orderItems()
+    {
+        return $this->hasMany(\App\Models\OrderItem::class, 'product_id', 'product_id');
+    }
+    
+    public function getReservedStockAttribute()
+    {
+        return $this->orderItems()
+            ->whereHas('order', function($q) {
+                $q->where('current_status', 'pending');
+            })
+            ->sum('quantity');
+    }
+
+
+
+    public function stockTransactions()
+    {
+        return $this->hasMany(StockTransaction::class, 'product_id', 'product_id');
+    }
+
+    public function latestStockTransaction()
+    {
+        return $this->hasOne(StockTransaction::class, 'product_id', 'product_id')->latest('created_at');
     }
 
 }

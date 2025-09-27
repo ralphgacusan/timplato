@@ -276,3 +276,66 @@ body {
 .order-actions-main a.btn:hover {
     opacity: 0.85;
 }
+
+
+.order-btn {
+    margin-top: 20px;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    /* same as Bootstrap btn */
+    font-weight: 500;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: #fff;
+    /* default text color */
+}
+
+/* Status colors */
+.order-btn.pending {
+    background-color: #343a40;
+    /* dark */
+}
+
+.order-btn.cancel-requested {
+    background-color: #6c757d;
+    /* gray */
+}
+
+.order-btn.cancelled {
+    background-color: #adb5bd;
+    /* light gray */
+}
+
+.order-btn.pay-now {
+    background-color: #ffc107;
+    /* yellow */
+    color: #212529;
+    /* dark text for contrast */
+}
+
+.order-btn.buy-again {
+    background-color: #28a745;
+    /* green */
+}
+
+.order-btn.track {
+    background-color: #fd7e14;
+    /* orange */
+}
+
+.order-btn.return-refund {
+    background-color: #17a2b8;
+    /* cyan */
+}
+
+/* Optional hover effect */
+.order-btn:hover:not(:disabled) {
+    filter: brightness(0.9);
+}
+
+.order-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}

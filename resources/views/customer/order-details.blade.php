@@ -190,37 +190,96 @@
                         <span>₱{{ number_format($order->total_amount, 2) }}</span>
                     </div>
 
-                    <div class="d-flex justify-content-between mb-2"><span>Order Status::</span>
-                        <span>{{ $order->current_status }}</span>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Order Status:</span>
+                        <span>{{ ucwords(str_replace('_', ' ', $order->current_status)) }}</span>
                     </div>
+
 
                     <!-- Dynamic Buttons -->
                     <div class="order-actions-main d-flex gap-2 justify-content-end">
                         @php $status = $order->current_status; @endphp
+                        @if ($status === 'cancel_requested')
+                            <button type="button" class="order-btn cancel-requested" disabled>Cancel Requested</button>
+                        @elseif ($status === 'cancelled')
+                            <button type="button" class="order-btn cancelled" disabled>Cancelled</button>
+                        @elseif ($status === 'pending')
+                            {{-- Button for Not COD orders that are not yet paid --}}
+                            @if ($order->payment_method != 'COD')
+                                <form
+                                    action="{{ route('paymongo.redirect', [
+                                        'amount' => $order->total_amount,
+                                        'order' => $order->order_id,
+                                        'paymentMethod' => $order->payment_method,
+                                    ]) }}"
+                                    method="GET">
+                                    @csrf
+                                    <button type="submit" class="order-btn pay-now">Pay
+                                        Now</button>
+                                </form>
+                            @endif
 
-                        @if ($status === 'pending')
-                            <form action="/" method="POST">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="btn btn-dark">Cancel Order</button>
-                            </form>
+                            <button type="button" class="order-btn pending"
+                                onclick="document.getElementById('cancelOrderModalOverlay-{{ $order->order_id }}').style.display='flex'">
+                                Cancel Order
+                            </button>
+
+
+                            <!-- Cancel Order Modal -->
+                            <div class="modal-overlay" id="cancelOrderModalOverlay-{{ $order->order_id }}"
+                                style="display:none;">
+                                <div class="modal-card">
+                                    <form action="{{ route('customer.orders.cancel', $order->order_id) }}"
+                                        method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <div class="modal-header">
+                                            <h2 class="modal-product-title">Cancel Order #{{ $order->order_id }}
+                                            </h2>
+                                        </div>
+
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to request cancellation for this order? The
+                                                seller/admin must approve it.</p>
+
+                                            <div class="modal-review-row">
+                                                <label for="cancel_reason">Reason (optional):</label>
+                                                <textarea name="cancel_reason" id="cancel_reason" class="modal-review-text"
+                                                    placeholder="Enter reason for cancellation"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="modal-btn modal-cancel"
+                                                data-target="cancelOrderModalOverlay-{{ $order->order_id }}">Close</button>
+                                            <button type="submit" class="modal-btn modal-submit">Request
+                                                Cancellation</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         @elseif (in_array($status, ['confirmed', 'processing']))
-                            <a href="/" class="btn btn-warning">Track Order</a>
+                            <a href="/" class="order-btn track"
+                                style="text-decoration:none; color:inherit;">Track Order</a>
                         @elseif (in_array($status, ['shipped', 'to_receive']))
-                            <a href="/" class="btn btn-warning">Request Return/Refund</a>
+                            <a href="/" class="order-btn return-refund"
+                                style="text-decoration:none; color:inherit;">Request Return/Refund</a>
                             <form action="/" method="POST">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="btn btn-success">Order Received</button>
+                                <button type="submit" class="order-btn buy-again">Order Received</button>
                             </form>
                         @elseif (in_array($status, ['delivered', 'completed']))
                             {{-- <a href="javascript:void(0);" class="btn btn-outline-secondary" id="addReviewBtn">Leave a
                                 Review</a> --}}
-                            <a href="/" class="btn btn-success">Buy Again</a>
+                            <a href="/" class="order-btn buy-again"
+                                style="text-decoration:none; color:inherit;">Buy Again</a>
                         @elseif ($status === 'cancelled')
-                            <a href="/" class="btn btn-success">Buy Again</a>
+                            <a href="/" class="order-btn buy-again"
+                                style="text-decoration:none; color:inherit;">Buy Again</a>
                         @elseif (in_array($status, ['returned', 'refunded']))
-                            <a href="/" class="btn btn-success">Buy Again</a>
+                            <a href="/" class="order-btn buy-again"
+                                style="text-decoration:none; color:inherit;">Buy Again</a>
                         @endif
                     </div>
 
@@ -304,6 +363,14 @@
                                 star.textContent = idx < rating ? '★' : '☆';
                             });
                         }
+                    });
+
+                    // close button for cancl request modal
+                    document.querySelectorAll('.modal-cancel').forEach(button => {
+                        button.addEventListener('click', () => {
+                            const targetId = button.getAttribute('data-target');
+                            document.getElementById(targetId).style.display = 'none';
+                        });
                     });
                 </script>
             @endverbatim

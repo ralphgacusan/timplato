@@ -40,14 +40,52 @@ class OrderController extends Controller
         // $paymentIntent = $this->paymongo->retrievePaymentIntent($paymentIntentId);
 
         // $status = $paymentIntent['data']['attributes']['status'];
+        $orderId = $request->query('order');
+
         $status = 'succeeded';
 
         if ($status === 'succeeded') {
-            return redirect()->route('customer.home')->with('success', 'Payment successful!');
+            $order = Order::with('items')->where('order_id', $orderId)->first();
+
+            // Update status
+            $order->update(['current_status' => 'confirmed']);
+
+            // 🔹 Now decrement stock and increment sold
+            foreach ($order->items as $item) {
+                Product::where('product_id', $item->product_id)
+                    ->decrement('stock_quantity', $item->quantity);
+
+                Product::where('product_id', $item->product_id)
+                    ->increment('sold', $item->quantity);
+            }
+
+            return redirect()->route('customer.home')->with('success', 'Payment successful for Order #' . $orderId);
         } else {
             return redirect()->route('customer.home')->with('error', 'Payment failed or pending.');
         }
     }
+
+    public function redirectToPaymongo($amount, $orderId, $paymentMethod)
+    {
+        $amountInCentavos = intval($amount * 100);
+
+        // Create checkout session
+        $checkout = $this->paymongo->createCheckoutSession(
+            $amountInCentavos,
+            $orderId,
+            strtolower($paymentMethod)
+        );
+
+        $checkoutUrl = $checkout['data']['attributes']['checkout_url'] ?? null;
+
+        if ($checkoutUrl) {
+            return redirect()->away($checkoutUrl); // Redirect to PayMongo
+        } else {
+            return redirect()->route('customer.checkout')
+                            ->with('error', 'Failed to generate payment link. Try again.');
+        }
+    }
+
 
 
     // Checkout page for full cart
@@ -119,7 +157,13 @@ class OrderController extends Controller
 
         $totalAmount = $subtotal + $deliveryFee - $discount;
 
-        
+        // Check stock availability before creating order
+        foreach ($items as $item) {
+            $product = Product::find($item['product_id']);
+            if ($product->stock_quantity < $item['quantity']) { // use correct column
+                return redirect()->back()->with('error', $product->name . ' does not have enough stock.');
+            }
+        }
 
         $order = Order::create([
             'user_id' => $user->id,
@@ -137,29 +181,19 @@ class OrderController extends Controller
                 'quantity' => $item['quantity'],
                 'price' => $item['price'],
             ]);
+
+            // // Decrement stock and increment sold
+            // Product::where('product_id', $item['product_id'])->decrement('stock_quantity', $item['quantity']);
+
+            // Product::where('product_id', $item['product_id'])->increment('sold', $item['quantity']);
         }
 
         // PayMongo if payment method is not Cash on Delivery
         if ($request->paymentMethod !== 'COD') {
-            $amountInCentavos = intval($totalAmount * 100);
-
-            // Create checkout session
-            $checkout = $this->paymongo->createCheckoutSession(
-                $amountInCentavos,
-                $order->order_id,
-                strtolower($request->paymentMethod) // e.g., 'gcash'
-            );
-
-            $checkoutUrl = $checkout['data']['attributes']['checkout_url'] ?? null;
-
-            if ($checkoutUrl) {
-                return redirect()->away($checkoutUrl); // Redirect directly to PayMongo
-            } else {
-                return redirect()->route('customer.checkout')
-                    ->with('error', 'Failed to generate payment link. Try again.');
-                //  dd($checkout);
-            }
+            return $this->redirectToPaymongo($order->total_amount, $order->order_id, $request->paymentMethod);
         }
+
+
 
         $cart = Cart::where('user_id', $user->id)->first();
 
@@ -192,7 +226,20 @@ class OrderController extends Controller
         ]);
     }
 
-// ADMIN SIDE
+    // Request Cancel
+    public function requestCancel(Request $request, Order $order)
+    {
+        $order->update([
+            'current_status' => 'cancel_requested',
+            'cancel_reason' => $request->cancel_reason,
+            'cancel_requested_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Cancel request submitted. Waiting for admin approval.');
+        // dd($request->all());
+    }
+
+    // ADMIN SIDE
     public function showOrderManagement(Request $request)
     {
         $query = Order::with(['user', 'rider', 'courier', 'items.product']);
@@ -226,6 +273,84 @@ class OrderController extends Controller
         $orders = $query->paginate(10)->withQueryString();
 
         return view('admin.order-management', compact('orders'));
+    }
+
+    // Show Specific Product page
+    public function showSpecific(Order $order)
+    {
+        // Load related models (user, items, products)
+        $order->load(['user', 'items.product']);
+
+        // Pass the order to the admin view
+        return view('admin.order-specific', compact('order'));
+    }
+
+    // Approve Cancel Request
+    public function approveCancel(Order $order)
+    {
+        // Restock items and decrement sold
+        foreach ($order->items as $item) {
+            Product::where('product_id', $item->product_id)
+                ->increment('stock_quantity', $item->quantity);
+
+            Product::where('product_id', $item->product_id)
+                ->decrement('sold', $item->quantity);
+        }
+
+        $order->update(['current_status' => 'cancelled']);
+        return redirect()->back()->with('success', 'Order cancellation approved.');
+    }
+
+    // Reject Cancel Request
+    public function rejectCancel(Order $order)
+    {
+        $order->update(['current_status' => 'pending']); // or previous status
+        return redirect()->back()->with('success', 'Order cancellation rejected.');
+    }
+
+    // Update current status
+    public function updateStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'current_status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancel_requested,cancelled,returned,refunded',
+        ]);
+
+        // If status is confirmed, subtract stock
+        if ($request->current_status === 'confirmed') {
+            foreach ($order->items as $item) {
+                Product::where('product_id', $item->product_id)
+                    ->decrement('stock_quantity', $item->quantity);
+
+                Product::where('product_id', $item->product_id)
+                    ->increment('sold', $item->quantity);
+            }
+        }
+
+        $order->update(['current_status' => $request->current_status]);
+
+        return redirect()->back()->with('success', 'Order status updated successfully.');
+    }
+
+
+    // Delete Order
+    public function destroy(Order $order)
+    {
+        // Restock items and decrement sold
+        foreach ($order->items as $item) {
+            Product::where('product_id', $item->product_id)
+                ->increment('stock_quantity', $item->quantity);
+
+            Product::where('product_id', $item->product_id)
+                ->decrement('sold', $item->quantity);
+        }
+
+        // Delete order items
+        $order->items()->delete();
+
+        // Delete the order
+        $order->delete();
+
+        return redirect()->route('admin.order-management')->with('success', 'Order deleted successfully.');
     }
 
 

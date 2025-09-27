@@ -38,6 +38,8 @@
                     <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>Shipped</option>
                     <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Delivered
                     </option>
+                    <option value="cancel_requested" {{ request('status') == 'cancel_requested' ? 'selected' : '' }}>
+                        Cancel Requested</option>
                     <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
                     </option>
                     <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>Returned</option>
@@ -114,7 +116,7 @@
                                         </option>
                                     </select>
                                 </form> --}}
-                                {{ ucfirst($order->current_status) }}
+                                {{ ucwords(str_replace('_', ' ', $order->current_status)) }}
                             </td>
 
                             <!-- Order Date -->
@@ -122,10 +124,11 @@
                             <!-- Actions -->
                             <td>
                                 <button class="om-action-btn om-action-view" title="View"
-                                    onclick="window.location.href='/'">
+                                    onclick="window.location.href='{{ route('admin.order-specific', ['order' => $order->order_id]) }}'">
                                     <span class="icon-container"><span class="icon-eye"></span></span>
                                 </button>
-                                <form action="/" method="POST" style="display:inline;">
+                                <form action="{{ route('admin.orders.destroy', ['order' => $order->order_id]) }}"
+                                    method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="om-action-btn om-action-delete" title="Delete"

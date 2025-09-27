@@ -6,26 +6,52 @@
         <link rel="stylesheet" href="{{ asset('css/customer/home.css') }}">
     @endpush
 
-    <div class="hero-section">
-        <div class="heroGrid">
-            <div class="heroImageCol">
-                <img src="{{ asset('Assets/heroPlate.png') }}" alt="hero header image" class="heroImage">
-            </div>
-            <div class="heroTextCol">
-                <h1 class="heroTitle">WELCOME TO</h1>
-                <img src="{{ asset('timplatoLogo/Timplato-White2.png') }}" alt="" class="heroLogo">
-                <p class="heroSubtitle">
-                    an e-commerce platform that focuses on providing kitchenware and cooking
-                    essentials to Filipino households. The name "Timplato" comes from two Filipino words, "timpla" which
-                    means to mix or season, and "plato" which means plate. This reflects the brand’s goal of helping
-                    people prepare and enjoy meals with the right tools.
-                </p>
-            </div>
-            <div class="shopNow">
-                <a href="{{ route('customer.products') }}" class="shop-now-btn">Shop Now</a>
+    @guest
+        <div class="hero-section">
+            <div class="heroGrid">
+                <div class="heroImageCol">
+                    <img src="{{ asset('Assets/heroPlate.png') }}" alt="hero header image" class="heroImage">
+                </div>
+                <div class="heroTextCol">
+                    <h1 class="heroTitle">WELCOME TO</h1>
+                    <img src="{{ asset('timplatoLogo/Timplato-White2.png') }}" alt="" class="heroLogo">
+                    <p class="heroSubtitle">
+                        an e-commerce platform that focuses on providing kitchenware and cooking
+                        essentials to Filipino households. The name "Timplato" comes from two Filipino words, "timpla" which
+                        means to mix or season, and "plato" which means plate. This reflects the brand’s goal of helping
+                        people prepare and enjoy meals with the right tools.
+                    </p>
+                </div>
+                <div class="shopNow">
+                    <a href="{{ route('customer.products') }}" class="shop-now-btn">Shop Now</a>
+                </div>
             </div>
         </div>
-    </div>
+    @endguest
+    @auth
+        <div class="hero-section" style="padding-top: 150px;">
+            <div class="heroGrid">
+                <div class="heroTextCol">
+                    <h1 class="heroTitle" style="font-size: 40px; font-weight: 800;">
+                        WELCOME BACK, {{ trim(Auth::user()->first_name . ' ' . Auth::user()->last_name) ?: 'Customer' }}!
+                    </h1>
+                    <p class="heroSubtitle">
+                        We're glad to see you again. Browse our latest kitchenware and cooking essentials,
+                        handpicked just for you. Let’s make every meal more special with the right tools.
+                    </p>
+                    <div class="shopNow">
+                        <a href="{{ route('customer.products') }}" class="shop-now-btn">Start Shopping</a>
+                    </div>
+                </div>
+                <div class="heroImageCol">
+                    <img src="{{ asset('Assets/heroPlate.png') }}" alt="hero header image" class="heroImage">
+                </div>
+            </div>
+        </div>
+    @endauth
+
+
+
 
     <div class="promo-carousel">
         <div id="carouselExampleControls" class="carousel slide">

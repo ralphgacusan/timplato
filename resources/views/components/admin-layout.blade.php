@@ -37,27 +37,52 @@
             @endif
         </div>
         <!-- Navbar -->
-        <div class="admin_nav">
-            <img src="/timplatoLogo/Timplato-White2.png" alt="Timplato Logo" class="logo">
-            <div class="admin_profile">
-                <img src="../Assets/cyrielPicture.png" alt="Admin Picture" class="admin_picture">
-                <p class="admin_name">Cyriel Alden Obillo</p>
-                <a href="#" id="userDropdownToggle">
+        <div class="admin_nav d-flex justify-content-between align-items-center p-2 shadow-sm"
+            style="background: #0a143b;">
+            <!-- Logo -->
+            <a href="{{ route('admin.product-management') }}">
+                <img src="{{ asset('timplatoLogo/Timplato-White2.png') }}" alt="Timplato Logo" class="logo"
+                    style="height:60px;">
+            </a>
+
+            <!-- Admin Profile -->
+            <div class="admin_profile position-relative d-flex align-items-center gap-2">
+                <img src="{{ Auth::user()->profile_picture_path ? asset(Auth::user()->profile_picture_path) : asset('timplatoLogo/Timplato-Blue-LOGO.png') }}"
+                    alt="Admin Picture" class="admin_picture rounded-circle"
+                    style="width:50px; height:50px; object-fit:cover; border:2px solid #fff;">
+
+                <p class="admin_name text-white mb-0">
+                    {{ trim(Auth::user()->first_name . ' ' . Auth::user()->last_name) ?: 'Admin' }}
+                </p>
+                <!-- Dropdown Toggle -->
+                <a href="javascript:void(0);" id="userDropdownToggle" class="text-white">
                     <div class="icon-container">
                         <span class="icon-down"></span>
                     </div>
                 </a>
-                <ul id="userDropdownMenu">
-                    <li>
+
+                <!-- Dropdown Menu -->
+                <ul id="userDropdownMenu" class="dropdown-menu position-absolute end-0 mt-2 p-2"
+                    style="display:none; background:#fff; border-radius:6px; min-width:150px; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                    <li class="mb-1">
                         <form action="{{ route('auth.logout') }}" method="POST" style="margin:0;">
                             @csrf
-                            <button type="submit" style="background:none;border:none;cursor:pointer;">Logout</button>
+                            <button type="submit" class="dropdown-item text-dark"
+                                style="width:100%; text-align:left; background:none; border:none; padding:6px 12px; cursor:pointer;">
+                                Logout
+                            </button>
                         </form>
                     </li>
-                    <li><a href="../HTML/loginPage.html">Change User</a></li>
+                    <li>
+                        <a href="{{ route('admin.product-management') }}" class="dropdown-item text-dark"
+                            style="padding:6px 12px; display:block; text-decoration:none;">
+                            Profile
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
+
 
 
         <!-- Sidebar -->
@@ -81,8 +106,8 @@
                     </a>
                 </li>
 
-                <li class="{{ request()->is('admin/inventory-management*') ? 'active' : '' }}">
-                    <a href="/">
+                <li class="{{ request()->is('admin/inventory/*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.inventory-management') }}">
                         <div class="icon-container">
                             <span class="icon-boxes"></span>
                         </div>
@@ -90,8 +115,8 @@
                     </a>
                 </li>
 
-                <li class="{{ request()->is('admin/user-management*') ? 'active' : '' }}">
-                    <a href="/">
+                <li class="{{ request()->is('admin/users/*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.user-management') }}">
                         <div class="icon-container">
                             <span class="icon-user"></span>
                         </div>

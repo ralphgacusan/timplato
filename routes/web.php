@@ -108,11 +108,17 @@ Route::post('/place-order', [OrderController::class, 'placeOrder'])->name('custo
 // Route to display a single order's details
 Route::get('/orders/{order}', [OrderController::class, 'showOrderDetails'])->name('customer.orderDetails')->middleware('auth');
 
-//PayMongo Payement Page
-Route::get('checkout/payment/{order}', [OrderController::class, 'paymentPage'])->name('customer.checkout.payment');
+// Request Cancel
+Route::patch('orders/{order}/cancel', [OrderController::class, 'requestCancel'])->name('customer.orders.cancel');
 
+
+
+
+//PayMongo Payement Page
 Route::get('payment/paymongo/callback', [OrderController::class, 'handlePaymongoCallback'])->name('paymongo.callback');
 
+//Redirect to Paymongo
+Route::get('payment/paymongo/{amount}/{order}/{paymentMethod}', [OrderController::class, 'redirectToPaymongo'])->name('paymongo.redirect');
 
 // // Resourceful routes for products (CRUD)
 // Route::resource('products', ProductController::class);
@@ -156,3 +162,29 @@ Route::delete('/admin/products/{product}', [ProductController::class, 'destroy']
 
 // Order Management page
 Route::get('/admin/orders/management', [OrderController::class, 'showOrderManagement'])->name('admin.order-management')->middleware('auth');
+// Order Specific page
+Route::get('/admin/orders/management/{order}', [OrderController::class, 'showSpecific'])->name('admin.order-specific')->middleware('auth');
+
+Route::patch('/admin/orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('admin.orders.update-status')->middleware('auth');
+// Aprove Cancel
+Route::patch('/admin/orders/{order}/approve-cancel', [OrderController::class, 'approveCancel'])->name('admin.orders.approve-cancel')->middleware('auth');
+
+// Reject Cancel
+Route::patch('/admin/orders/{order}/reject-cancel', [OrderController::class, 'rejectCancel'])->name('admin.orders.reject-cancel')->middleware('auth');
+
+// Delete Order
+Route::delete('/admin/orders/{order}', [OrderController::class, 'destroy'])->name('admin.orders.destroy')->middleware('auth');
+
+
+// User Management
+Route::get('/admin/users/management', [AuthController::class, 'showUserManagement'])->name('admin.user-management');
+Route::delete('/admin/users/{id}', [AuthController::class, 'destroy'])->name('admin.users.destroy');
+
+
+
+// Inventory Management
+Route::get('/admin/inventory/management', [ProductController::class, 'showInventoryManagement'])->name('admin.inventory-management');
+
+Route::patch('/admin/inventory/{product}/update-stock', [ProductController::class, 'updateStock'])->name('admin.inventory.updateStock');
+
+Route::get('/admin/inventory/{product}/history', [ProductController::class, 'viewStockHistory'])->name('admin.inventory.history');

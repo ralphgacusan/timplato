@@ -140,6 +140,13 @@
                 });
             </script>
         @endif
+        @if (request()->query('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    showNotification(@json(request()->query('error')), 'error');
+                });
+            </script>
+        @endif
 
         <main class="main-container">
 

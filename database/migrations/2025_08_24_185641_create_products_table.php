@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable(); // Product description
             $table->decimal('price', 10, 2); // Product price
             $table->integer('stock_quantity'); // Inventory level
+            $table->integer('sold')->default(0); // Total units sold
             $table->integer('restock_level')->nullable(); // Minimum quantity before restock alert
             $table->unsignedBigInteger('category_id'); // Foreign key to categories
             $table->timestamps(); // created_at and updated_at
