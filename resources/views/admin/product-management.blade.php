@@ -26,6 +26,12 @@
                     </option>
                 </select>
 
+                <select name="status" class="pm-status" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Active</option>
+                    <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Inactive</option>
+                </select>
+
                 <select name="category" class="pm-category" onchange="this.form.submit()">
                     <option value="">Category</option>
                     @foreach (\App\Models\Category::whereNull('parent_id')->get() as $mainCategory)
@@ -62,7 +68,8 @@
                         <th>Name</th>
                         <th>Category</th>
                         <th>Sub Category</th>
-                        <th>Price</th> {{-- ✅ New Price column --}}
+                        <th>Price</th>
+                        <th>Status</th> {{-- ✅ New Status column --}}
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -79,7 +86,6 @@
                                             alt="{{ $product->name }}">
                                     @else
                                         {{-- Image Placeholder --}}
-                                        {{-- <img src="{{ asset('img/product-placeholder.png') }}" alt="No Image"> --}}
                                     @endif
                                 </div>
                             </td>
@@ -87,7 +93,14 @@
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->main_category }}</td>
                             <td>{{ $product->sub_category }}</td>
-                            <td>₱{{ number_format($product->price, 2) }}</td> {{-- ✅ Show formatted price --}}
+                            <td>₱{{ number_format($product->price, 2) }}</td>
+                            <td>
+                                @if ($product->status)
+                                    <span class="status-active">Active</span>
+                                @else
+                                    <span class="status-inactive">Inactive</span>
+                                @endif
+                            </td>
                             <td>
                                 <button class="pm-action-btn pm-action-edit" title="Edit"
                                     onclick="window.location.href='{{ route('admin.products.edit', ['product' => $product->product_id]) }}'">
@@ -110,8 +123,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" style="text-align: center;">No records available</td>
-                            {{-- ✅ colspan updated --}}
+                            <td colspan="8" style="text-align: center;">No records available</td>
                         </tr>
                     @endforelse
                 </tbody>

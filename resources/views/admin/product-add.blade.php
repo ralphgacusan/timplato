@@ -14,14 +14,83 @@
             <div class="add-product-grid">
                 <!-- LEFT: Name and Description -->
                 <div class="add-product-section add-product-desc">
-                    <h3>Name and Description</h3>
-                    <label for="name">Product Name</label>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <h3>Name and Description</h3>
+                        <!-- Toggle -->
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-weight: 500;">Status:</span>
+                            <label class="switch">
+                                <input type="checkbox" id="status" name="status" value="1" checked>
+                                <span class="slider round"></span>
+                            </label>
+                            <span id="statusLabel" style="font-size: 0.9rem;">Active</span>
+                        </div>
+                    </div>
+
+                    <label for="name" style="margin-top: 1rem;">Product Name</label>
                     <input type="text" id="name" name="name" placeholder="Enter Product Name"
                         value="{{ old('name') }}" required>
 
-                    <label for="description">Product Description</label>
+                    <label for="description" style="margin-top: 1rem;">Product Description</label>
                     <textarea id="description" name="description" placeholder="Enter Description" rows="6" required>{{ old('description') }}</textarea>
                 </div>
+
+                <!-- Switch Styles -->
+                <style>
+                    .switch {
+                        position: relative;
+                        display: inline-block;
+                        width: 45px;
+                        height: 24px;
+                    }
+
+                    .switch input {
+                        opacity: 0;
+                        width: 0;
+                        height: 0;
+                    }
+
+                    .slider {
+                        position: absolute;
+                        cursor: pointer;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background-color: #ccc;
+                        transition: 0.4s;
+                        border-radius: 24px;
+                    }
+
+                    .slider:before {
+                        position: absolute;
+                        content: "";
+                        height: 18px;
+                        width: 18px;
+                        left: 3px;
+                        bottom: 3px;
+                        background-color: white;
+                        transition: 0.4s;
+                        border-radius: 50%;
+                    }
+
+                    input:checked+.slider {
+                        background-color: #0a143b;
+                        /* site primary color */
+                    }
+
+                    input:checked+.slider:before {
+                        transform: translateX(21px);
+                    }
+                </style>
+
+                <!-- Toggle Text Script -->
+                <script>
+                    document.getElementById('status').addEventListener('change', function() {
+                        document.getElementById('statusLabel').textContent = this.checked ? 'Active' : 'Inactive';
+                    });
+                </script>
+
 
                 <!-- RIGHT: Pricing and Stocks -->
                 <div class="add-product-right">

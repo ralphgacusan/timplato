@@ -63,7 +63,8 @@
                                                 <div class="fw-semibold">{{ $item->product->name }}</div>
                                             </a>
                                             <div class="text-muted" style="font-size:0.95rem;">
-                                                {{ $item->product->description ?? 'No description' }}
+                                                {{ \Illuminate\Support\Str::limit($item->product->description ?? 'No description', 50) }}
+
                                             </div>
                                         </td>
                                         <td>₱{{ number_format($item->product->price, 2) }}</td>
@@ -111,7 +112,7 @@
                                                                     <div class="modal-product-title">
                                                                         {{ $item->product->name }}</div>
                                                                     <div class="modal-product-desc">
-                                                                        {{ $item->product->description ?? 'No description' }}
+                                                                        {{ \Illuminate\Support\Str::limit($item->product->description ?? 'No description', 50) }}
                                                                     </div>
                                                                     <div class="modal-product-price">
                                                                         ₱{{ number_format($item->product->price, 2) }}
@@ -259,27 +260,82 @@
                                 </div>
                             </div>
                         @elseif (in_array($status, ['confirmed', 'processing']))
-                            <a href="/" class="order-btn track"
-                                style="text-decoration:none; color:inherit;">Track Order</a>
+                            {{-- <a href="/" class="order-btn track"
+                                style="text-decoration:none; color:inherit;">Track Order</a> --}}
                         @elseif (in_array($status, ['shipped', 'to_receive']))
-                            <a href="/" class="order-btn return-refund"
-                                style="text-decoration:none; color:inherit;">Request Return/Refund</a>
-                            <form action="/" method="POST">
+                            <!-- Order Received button -->
+                            {{-- <form action="{{ route('customer.home', $order->order_id) }}" method="POST">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" class="order-btn buy-again">Order Received</button>
-                            </form>
+                            </form> --}}
                         @elseif (in_array($status, ['delivered', 'completed']))
                             {{-- <a href="javascript:void(0);" class="btn btn-outline-secondary" id="addReviewBtn">Leave a
                                 Review</a> --}}
-                            <a href="/" class="order-btn buy-again"
-                                style="text-decoration:none; color:inherit;">Buy Again</a>
+                            <!-- Return/Refund button -->
+                            <button type="button" class="order-btn return-refund"
+                                onclick="document.getElementById('returnRefundModalOverlay-{{ $order->order_id }}').style.display='flex'">
+                                Request Return/Refund
+                            </button>
+
+                            <!-- Modal for Request Return/Refund -->
+                            <div class="modal-overlay" id="returnRefundModalOverlay-{{ $order->order_id }}"
+                                style="display:none;">
+                                <div class="modal-card">
+                                    <form action="{{ route('customer.orders.return-refund', $order->order_id) }}"
+                                        method="POST">
+                                        @csrf
+                                        @method('PATCH')
+
+                                        <div class="modal-header">
+                                            <h2 class="modal-product-title">Request Return/Refund for Order
+                                                #{{ $order->order_id }}</h2>
+                                        </div>
+
+                                        <div class="modal-body">
+                                            <p>Please select your request type and provide details below:</p>
+
+                                            <div class="mb-3">
+                                                <label for="request_type" class="fw-semibold">Request Type:</label>
+                                                <select name="request_type" id="request_type" class="form-select">
+                                                    <option value="return">Return</option>
+                                                    <option value="refund">Refund</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="modal-review-row">
+                                                <label for="reason">Reason:</label>
+                                                <textarea name="reason" id="reason" class="modal-review-text"
+                                                    placeholder="Describe the issue or reason for return/refund" required></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="modal-btn modal-cancel"
+                                                data-target="returnRefundModalOverlay-{{ $order->order_id }}">Close</button>
+                                            <button type="submit" class="modal-btn modal-submit">Submit
+                                                Request</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <form action="{{ route('customer.orders.buy-again', $order->order_id) }}" method="POST"
+                                style="display:inline;">
+                                @csrf
+                                <button type="submit" class="order-btn buy-again">Buy Again</button>
+                            </form>
                         @elseif ($status === 'cancelled')
-                            <a href="/" class="order-btn buy-again"
-                                style="text-decoration:none; color:inherit;">Buy Again</a>
+                            <form action="{{ route('customer.orders.buy-again', $order->order_id) }}" method="POST"
+                                style="display:inline;">
+                                @csrf
+                                <button type="submit" class="order-btn buy-again">Buy Again</button>
+                            </form>
                         @elseif (in_array($status, ['returned', 'refunded']))
-                            <a href="/" class="order-btn buy-again"
-                                style="text-decoration:none; color:inherit;">Buy Again</a>
+                            <form action="{{ route('customer.orders.buy-again', $order->order_id) }}" method="POST"
+                                style="display:inline;">
+                                @csrf
+                                <button type="submit" class="order-btn buy-again">Buy Again</button>
+                            </form>
                         @endif
                     </div>
 

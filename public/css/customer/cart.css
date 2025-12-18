@@ -198,7 +198,7 @@ body {
 }
 
 .cart-summary-value {
-    color: var(--primary);
+    color: var(--text);
     font-weight: 500;
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
@@ -206,7 +206,7 @@ body {
 .cart-summary-total {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--primary);
+    color: var(--text);
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 

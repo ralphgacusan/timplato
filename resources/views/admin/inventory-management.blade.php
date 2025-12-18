@@ -21,8 +21,6 @@
                     </option>
                     <option value="stock-desc" {{ request('sort') == 'stock-desc' ? 'selected' : '' }}>Stock (High →
                         Low)</option>
-                    <option value="latest-restock" {{ request('sort') == 'latest-restock' ? 'selected' : '' }}>Latest
-                        Restock</option>
                 </select>
 
                 <!-- Status Filter -->

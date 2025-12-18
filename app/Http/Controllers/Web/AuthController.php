@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
-
+use App\Models\AdminLog;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Cart;
@@ -50,6 +50,7 @@ class AuthController extends Controller
                 ['email' => $googleUser->getEmail()],
                 [
                     'first_name' => $googleUser->user['given_name'] ?? $googleUser->getName(),
+                    'middle_name'   => $googleUser->user['middle_name'] ?? null,
                     'last_name'  => $googleUser->user['family_name'] ?? '',
                     'password'   => Hash::make(uniqid()),
                     'role'       => 'user',
@@ -58,6 +59,21 @@ class AuthController extends Controller
                     'phone'      => null,
                 ]
             );
+
+            //  Suspension Check (same as manual login)
+            if ($user->suspended_until) {
+                $now = now();
+
+                if ($now->lessThan($user->suspended_until)) {
+                    // Still suspended
+                    return redirect()->route('login')->withErrors([
+                        'email' => 'Your account is suspended until ' . $user->suspended_until->format('F d, Y') . '.',
+                    ]);
+                } else {
+                    // Suspension expired — clear it
+                    $user->update(['suspended_until' => null]);
+                }
+            }
 
             // Log the user in
             Auth::login($user);
@@ -93,6 +109,11 @@ class AuthController extends Controller
                 'string',
                 'max:50',
                 'regex:/^[A-Za-z\s\-]+$/', // Only letters, spaces, hyphens
+            ],
+            'middle_name' => [
+                'nullable',
+                'max:50',
+                'regex:/^[A-Za-z\s\-]+$/',
             ],
             'last_name' => [
                 'required',
@@ -185,12 +206,38 @@ class AuthController extends Controller
             // Get the authenticated user
             $user = Auth::user();
 
+            // Check for suspension
+        if ($user->suspended_until) {
+            $now = now();
+
+            if ($now->lessThan($user->suspended_until)) {
+                // User is still suspended
+                if (Auth::check()) {
+                    Auth::user()->update(['last_logout_at' => now()]);
+                }
+
+                Auth::logout();
+
+                return back()->withErrors([
+                    'email' => 'Your account is suspended until ' . \Carbon\Carbon::parse($user->suspended_until)->format('F d, Y') . '.',
+                ])->onlyInput('email');
+            } else {
+                // Suspension expired — automatically clear it
+                $user->update(['suspended_until' => null]);
+            }
+        }
+
             // Update last login
             $user->update(['last_login_at' => now()]);
 
+        // Log admin login action
+        if ($user->role === 'admin') {
+            $this->logAdminAction('login', 'Admin', $user->id, 'Admin logged in');
+        }
+
             // Check if the user is admin
             if ($user->role === 'admin') {
-                return redirect()->route('admin.product-management')->with('success', 'Welcome Admin ' . $user->first_name . '!');
+                return redirect()->route('admin.dashboard')->with('success', 'Welcome Admin ' . $user->first_name . '!');
             } else {
                 // Merge guest cart for regular users
                 $oldSessionId = $request->session()->getId();
@@ -209,14 +256,27 @@ class AuthController extends Controller
 
 
     // Log out
-    public function logout(Request $request){
+    public function logout(Request $request)
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $user->last_logout_at = now();
+            $user->save();
+
+            // Log admin logout action
+            if ($user->role === 'admin') {
+                $this->logAdminAction('logout', 'Admin', $user->id, 'Admin logged out');
+            }
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()->route('customer.home')->with('success', 'You have successfully logged out!');
-    } 
+    }
+
 
     public function redirectToSignin(){
         return view('auth.sign-in');
@@ -243,7 +303,7 @@ class AuthController extends Controller
         'to-receive' => $orders->filter(fn($o) => $o->current_status === 'shipped')->values(),
         'completed' => $orders->filter(fn($o) => $o->current_status === 'delivered')->values(),
         'cancelled' => $orders->filter(fn($o) => $o->current_status === 'cancelled')->values(),
-        'return-refund' => $orders->filter(fn($o) => in_array($o->current_status, ['returned', 'refunded']))->values(),
+        'return-refund' => $orders->filter(fn($o) => in_array($o->current_status, ['returned', 'return_requested','return_approved', 'refunded', 'refund_requested', 'refund_approved']))->values(),
     ];
 
     // Fetch both user-specific and general notifications
@@ -274,6 +334,7 @@ class AuthController extends Controller
         // Validation
         $rules = [
             'first_name' => 'required|string|max:50|regex:/^[A-Za-z\s\-]+$/',
+            'middle_name' => 'nullable|string|max:50|regex:/^[A-Za-z\s\-]+$/',
             'last_name' => 'required|string|max:50|regex:/^[A-Za-z\s\-]+$/',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|regex:/^\+?[0-9]{11,13}$/',
@@ -307,6 +368,7 @@ class AuthController extends Controller
         $user->update($validated);
 
         return redirect()->route('auth.user-profile')->with('success', 'Profile updated successfully!');
+        // dd($validated);
     }
 
 
@@ -390,12 +452,163 @@ class AuthController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
 
+        $this->logAdminAction('delete', 'User', $user->id, 'Deleted user account');
+
         return redirect()->route('admin.user-management')->with('success', 'User deleted successfully.');
     }
 
+    public function suspend($id)
+    {
+        $user = User::findOrFail($id);
 
+        // Suspend for 30 days from now
+        $user->suspended_until = now()->addDays(30);
+        $user->save();
+
+            $this->logAdminAction('suspend', 'User', $user->id, 'Suspended user account for 30 days');
+        return redirect()->route('admin.user-management')->with('success', 'User suspended for 30 days.');
+    }
+
+    public function unsuspend($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Remove suspension
+        $user->suspended_until = null;
+        $user->save();
+         $this->logAdminAction('unsuspend', 'User', $user->id, 'Unsuspended user account');
+        return redirect()->route('admin.user-management')->with('success', 'User has been unsuspended successfully.');
+    }
 
     
 
+    // Show specific user profile for admin
+    public function userAccountViewPage($id)
+    {
+        $user = User::with('addresses')->findOrFail($id); // Load user and their addresses
+        return view('admin.user-account-view', compact('user'));
+    }
+
+
+    public function userAccountViewEditInformationPage(User $user){
+        return view('admin.user-account-edit-information', compact('user'));
+    }
+
+    // Update User Account (Admin)
+public function updateUserAccountInformation(Request $request, $userId)
+{
+    // Find the user or fail
+    $user = User::findOrFail($userId);
+
+       // Validation
+        $rules = [
+            'first_name' => 'required|string|max:50|regex:/^[A-Za-z\s\-]+$/',
+            'middle_name' => 'nullable|string|max:50|regex:/^[A-Za-z\s\-]+$/',
+            'last_name' => 'required|string|max:50|regex:/^[A-Za-z\s\-]+$/',
+            'role' => 'required|in:user,admin',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|regex:/^\+?[0-9]{11,13}$/',
+            'gender' => 'nullable|in:male,female,other',
+            'date_of_birth' => 'nullable|date|before:today',
+            'profile_photo' => 'nullable|image|max:2048', // optional photo, max 2MB
+        ];
+
+    $validated = $request->validate($rules);
+
+    // Handle profile photo upload
+    if ($request->hasFile('profile_photo')) {
+        $file = $request->file('profile_photo');
+
+        // Delete old profile photo if it exists
+        if ($user->profile_picture_path && file_exists(public_path($user->profile_picture_path))) {
+            unlink(public_path($user->profile_picture_path));
+        }
+
+        // Save new photo
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('images/user-profile-pictures'), $fileName);
+        $validated['profile_picture_path'] = 'images/user-profile-pictures/' . $fileName;
+    }
+
+    // Update user data
+    $user->update($validated);
+
+    // // Debug check
+    // dd($validated);
+    
+    $this->logAdminAction('update', 'User', $user->id, 'Updated user account information');
+    // Or redirect back (after testing)
+    return redirect()->route('admin.user-account-view', $user->id)
+        ->with('success', 'User account updated successfully!');
+}
+
+
+    public function userAccountViewEditAddressPage($id)
+    {
+        // Fetch user with their addresses
+        $user = \App\Models\User::with('addresses')->findOrFail($id);
+
+        return view('admin.user-account-edit-address', compact('user'));
+    }
+        
+
+    // Add User
+    // Show "Add User" Page
+    public function createUserPage()
+    {
+        return view('admin.user-management-create');
+    }
+
+
+    // Handle Add User Form Submission
+    public function storeUser(Request $request)
+    {
+        // Validation rules
+        $rules = [
+            'first_name' => 'required|string|max:50|regex:/^[A-Za-z\s\-]+$/',
+            'middle_name' => 'nullable|string|max:50|regex:/^[A-Za-z\s\-]+$/',
+            'last_name' => 'required|string|max:50|regex:/^[A-Za-z\s\-]+$/',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'phone' => 'nullable|string|regex:/^\+?[0-9]{11,13}$/',
+            'gender' => 'nullable|in:male,female,other',
+            'date_of_birth' => 'nullable|date|before:today',
+            'role' => 'required|in:user,admin',
+            'password' => 'required|string|min:8|max:64|confirmed',
+            'profile_photo' => 'nullable|image|max:2048',
+        ];
+
+        $validated = $request->validate($rules);
+
+        // Handle profile photo
+        if ($request->hasFile('profile_photo')) {
+            $file = $request->file('profile_photo');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('images/user-profile-pictures'), $fileName);
+            $validated['profile_picture_path'] = 'images/user-profile-pictures/' . $fileName;
+        }
+
+        // Hash password
+        $validated['password'] = Hash::make($validated['password']);
+
+        // dd($request);
+        // Create user
+        User::create($validated);
+         $this->logAdminAction('create', 'User', $user->id, 'Created new user account');
+        // Redirect back
+        return redirect()->route('admin.user-management')->with('success', 'User added successfully.');
+    }
+
+// Protected helper to log admin actions
+    protected function logAdminAction($action, $targetType = null, $targetId = null, $details = null)
+    {
+        AdminLog::create([
+            'admin_id' => auth()->id(),
+            'action' => $action,
+            'target_type' => $targetType,
+            'target_id' => $targetId,
+            'details' => $details,
+            'ip_address' => request()->ip(),
+        ]);
+    }
 
 }

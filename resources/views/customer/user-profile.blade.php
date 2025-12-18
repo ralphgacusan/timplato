@@ -21,8 +21,24 @@
                         {{ Auth::user()->first_name }} {{ Auth::user()->last_name }}
                     </div>
                     <div class="text-primary fs-5">
-                        {{ Auth::user()->phone ?? 'No phone set' }}
-                        <span class="ms-1"><i class="bi bi-patch-check-fill"></i></span>
+                        @php
+                            $now = \Carbon\Carbon::now();
+                            $status = '';
+
+                            if ($user->suspended_until && $user->suspended_until->isFuture()) {
+                                $status = '<span class="status suspended">Suspended</span>';
+                            } elseif ($user->last_login_at && $user->last_login_at->diffInDays($now) <= 30) {
+                                $status = '<span class="status active">Active</span>';
+                            } elseif ($user->last_login_at) {
+                                $status =
+                                    '<span class="status inactive">Inactive since ' .
+                                    $user->last_login_at->format('M d, Y H:i') .
+                                    '</span>';
+                            } else {
+                                $status = '<span class="status never">Never logged in</span>';
+                            }
+                        @endphp
+                        {!! $status !!}
                     </div>
                 </div>
             </div>
@@ -30,55 +46,46 @@
             <!-- Address Display -->
             <div class="col-lg-8">
                 @php
-                    // Get the default address
                     $defaultAddress = Auth::user()->addresses->where('is_default', 1)->first();
                 @endphp
                 <div class="card p-4 mb-4 shadow-sm">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="fw-semibold">Address
-
+                        <div class="fw-semibold">
+                            Address
                             @if ($defaultAddress)
                                 <span class="badge bg-secondary ms-1">{{ $defaultAddress->label }}</span>
                             @endif
-
                         </div>
-                        <a href=" {{ route('auth.user-profile.manage-address') }}" class="btn btn-warning btn-sm">
+                        <a href="{{ route('auth.user-profile.manage-address') }}" class="btn btn-warning btn-sm">
                             Manage Addresses
                         </a>
                     </div>
 
-
-
                     <!-- Row 1: Street Address + ZIP -->
                     <div class="row g-2 mb-2">
                         <div class="col-md-8">
-                            <label class="form-label">Street Address</label>
-                            <input type="text" class="form-control" value="{{ $defaultAddress?->address ?? 'N/A' }}"
-                                readonly>
+                            <label class="form-label d-block">Street Address</label>
+                            <p class="form-control-plaintext">{{ $defaultAddress?->address ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">ZIP Code</label>
-                            <input type="text" class="form-control" value="{{ $defaultAddress?->zip_code ?? 'N/A' }}"
-                                readonly>
+                            <label class="form-label d-block">ZIP Code</label>
+                            <p class="form-control-plaintext">{{ $defaultAddress?->zip_code ?? 'N/A' }}</p>
                         </div>
                     </div>
 
                     <!-- Row 2: Country / City / State -->
                     <div class="row g-2 mb-2">
                         <div class="col-md-4">
-                            <label class="form-label">Country</label>
-                            <input type="text" class="form-control" value="{{ $defaultAddress?->country ?? 'N/A' }}"
-                                readonly>
+                            <label class="form-label d-block">Country</label>
+                            <p class="form-control-plaintext">{{ $defaultAddress?->country ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">City</label>
-                            <input type="text" class="form-control" value="{{ $defaultAddress?->city ?? 'N/A' }}"
-                                readonly>
+                            <label class="form-label d-block">City</label>
+                            <p class="form-control-plaintext">{{ $defaultAddress?->city ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">State/Province</label>
-                            <input type="text" class="form-control" value="{{ $defaultAddress?->state ?? 'N/A' }}"
-                                readonly>
+                            <label class="form-label d-block">State/Province</label>
+                            <p class="form-control-plaintext">{{ $defaultAddress?->state ?? 'N/A' }}</p>
                         </div>
                     </div>
                 </div>
@@ -87,44 +94,56 @@
 
         <!-- General Information Display -->
         <div class="card p-4 mt-4 shadow-sm">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="fw-semibold fs-5">General Information</div>
-                <a href=" {{ route('auth.user-profile.edit') }}" class="btn btn-warning btn-sm">Edit Profile</a>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-semibold mb-0">General Information</h5>
+                <a href="{{ route('auth.user-profile.edit') }}" class="btn btn-warning btn-sm">Edit Profile</a>
             </div>
 
+            <!-- Row 1: Names + Gender (4 Columns) -->
             <div class="row g-3 mb-3">
                 <div class="col-md-3">
-                    <label class="form-label">First Name</label>
-                    <input type="text" class="form-control" value="{{ Auth::user()->first_name }}" readonly>
+                    <label class="form-label d-block">First Name</label>
+                    <p class="form-control-plaintext">{{ Auth::user()->first_name }}</p>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Last Name</label>
-                    <input type="text" class="form-control" value="{{ Auth::user()->last_name }}" readonly>
+                    <label class="form-label d-block">Middle Name</label>
+                    <p class="form-control-plaintext">{{ Auth::user()->middle_name ?? 'N/A' }}</p>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Gender</label>
-                    <input type="text" class="form-control"
-                        value="{{ ucfirst(str_replace('_', ' ', Auth::user()->gender ?? 'N/A')) }}" readonly>
+                    <label class="form-label d-block">Last Name</label>
+                    <p class="form-control-plaintext">{{ Auth::user()->last_name }}</p>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Date of Birth</label>
-                    <input type="text" class="form-control"
-                        value="{{ Auth::user()->date_of_birth ? \Carbon\Carbon::parse(Auth::user()->date_of_birth)->format('F d, Y') : '' }}"
-                        readonly>
+                    <label class="form-label d-block">Gender</label>
+                    <p class="form-control-plaintext">
+                        {{ ucfirst(str_replace('_', ' ', Auth::user()->gender ?? 'N/A')) }}
+                    </p>
                 </div>
             </div>
 
+            <!-- Row 2: DOB, Phone, Email, Hidden Column (Keeps layout aligned) -->
             <div class="row g-3 mb-3">
                 <div class="col-md-3">
-                    <label class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" value="{{ Auth::user()->phone ?? 'N/A' }}" readonly>
+                    <label class="form-label d-block">Date of Birth</label>
+                    <p class="form-control-plaintext">
+                        {{ Auth::user()->date_of_birth ? \Carbon\Carbon::parse(Auth::user()->date_of_birth)->format('F d, Y') : 'N/A' }}
+                    </p>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Email Address</label>
-                    <input type="text" class="form-control" value="{{ Auth::user()->email }}" readonly>
+                    <label class="form-label d-block">Phone Number</label>
+                    <p class="form-control-plaintext">{{ Auth::user()->phone ?? 'N/A' }}</p>
                 </div>
+                <div class="col-md-3">
+                    <label class="form-label d-block">Email Address</label>
+                    <p class="form-control-plaintext">{{ Auth::user()->email }}</p>
+                </div>
+                <!-- Hidden column to maintain 4-column structure -->
+                <div class="col-md-3 d-none"></div>
             </div>
+
         </div>
+
+
 
         <!-- Delivery Section -->
         <div class="delivery-section mt-4">
@@ -178,7 +197,7 @@
                                                 <div class="order-header d-flex justify-content-between mb-2">
                                                     <span class="store fw-bold">Timplato</span>
                                                     <div class="order-actions">
-                                                        <button class="btn btn-primary btn-sm">Chat</button>
+                                                        {{-- <button class="btn btn-primary btn-sm">Chat</button> --}}
                                                     </div>
                                                 </div>
 
@@ -292,19 +311,90 @@
                                                         </div>
                                                     </div>
                                                 @elseif (in_array($status, ['confirmed', 'processing']))
-                                                    <button class="btn btn-warning">Track Order</button>
+                                                    {{-- <button class="btn btn-warning">Track Order</button> --}}
                                                 @elseif (in_array($status, ['shipped', 'to_receive']))
-                                                    <button class="btn btn-success">Order Received</button>
+                                                    {{-- <button class="btn btn-success">Order Received</button> --}}
                                                 @elseif (in_array($status, ['delivered', 'completed']))
-                                                    <button class="btn btn-warning">Request
-                                                        Return/Refund</button>
-                                                    <button class="btn btn-outline-secondary">Leave a
-                                                        Review</button>
-                                                    <button class="btn btn-success">Buy Again</button>
+                                                    <!-- Return/Refund button -->
+                                                    <button type="button" class="btn btn-warning"
+                                                        onclick="document.getElementById('returnRefundModalOverlay-{{ $order->order_id }}').style.display='flex'">
+                                                        Request Return/Refund
+                                                    </button>
+
+                                                    <!-- Modal for Request Return/Refund -->
+                                                    <div class="modal-overlay"
+                                                        id="returnRefundModalOverlay-{{ $order->order_id }}"
+                                                        style="display:none;">
+                                                        <div class="modal-card">
+                                                            <form
+                                                                action="{{ route('customer.orders.return-refund', $order->order_id) }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                @method('PATCH')
+
+                                                                <div class="modal-header">
+                                                                    <h2 class="modal-product-title">Request
+                                                                        Return/Refund for Order
+                                                                        #{{ $order->order_id }}</h2>
+                                                                </div>
+
+                                                                <div class="modal-body">
+                                                                    <p>Please select your request type and provide
+                                                                        details below:</p>
+
+                                                                    <div class="mb-3">
+                                                                        <label for="request_type"
+                                                                            class="fw-semibold">Request Type:</label>
+                                                                        <select name="request_type" id="request_type"
+                                                                            class="form-select">
+                                                                            <option value="return">Return</option>
+                                                                            <option value="refund">Refund</option>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <div class="modal-review-row">
+                                                                        <label for="reason">Reason:</label>
+                                                                        <textarea name="reason" id="reason" class="modal-review-text"
+                                                                            placeholder="Describe the issue or reason for return/refund" required></textarea>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="modal-footer">
+                                                                    <button type="button"
+                                                                        class="modal-btn modal-cancel"
+                                                                        data-target="returnRefundModalOverlay-{{ $order->order_id }}">Close</button>
+                                                                    <button type="submit"
+                                                                        class="modal-btn modal-submit">Submit
+                                                                        Request</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                    {{-- <button class="btn btn-outline-secondary">Leave a
+                                                        Review</button> --}}
+                                                    <form
+                                                        action="{{ route('customer.orders.buy-again', $order->order_id) }}"
+                                                        method="POST" style="display:inline;">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-success">Buy
+                                                            Again</button>
+                                                    </form>
                                                 @elseif ($status === 'cancelled')
-                                                    <button class="btn btn-success">Buy Again</button>
+                                                    <form
+                                                        action="{{ route('customer.orders.buy-again', $order->order_id) }}"
+                                                        method="POST" style="display:inline;">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-success">Buy
+                                                            Again</button>
+                                                    </form>
                                                 @elseif (in_array($status, ['returned', 'refunded']))
-                                                    <button class="btn btn-success">Buy Again</button>
+                                                    <form
+                                                        action="{{ route('customer.orders.buy-again', $order->order_id) }}"
+                                                        method="POST" style="display:inline;">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-success">Buy
+                                                            Again</button>
+                                                    </form>
                                                 @endif
                                             </div>
 
@@ -330,43 +420,52 @@
                                     @php
                                         $imageUrl = null;
 
-                                        // Check if notification is related to a product
+                                        // Determine image source
                                         if ($notification->product?->primaryImage) {
                                             $imageUrl = asset(
                                                 'images/' . $notification->product->primaryImage->image_url,
                                             );
-                                        }
-                                        // If not, check if notification is related to an order with items
-                                        elseif ($notification->order?->items->first()?->product?->primaryImage) {
+                                        } elseif ($notification->order?->items->first()?->product?->primaryImage) {
                                             $imageUrl = asset(
                                                 'images/' .
                                                     $notification->order->items->first()->product->primaryImage
                                                         ->image_url,
                                             );
-                                        }
-                                        // Else, use a default placeholder or leave null
-                                        else {
+                                        } else {
                                             $imageUrl = asset('images/product-placeholder.png');
                                         }
+
+                                        // Get order ID if notification is related to an order
+                                        $orderId = $notification->order_id ?? ($notification->order?->id ?? null);
                                     @endphp
 
                                     <div class="notification-card">
                                         <div class="notification-header">
                                             <span class="notification-title">{{ $notification->title }}</span>
-                                            <button class="notification-details-btn">View Details</button>
+
+                                            @if ($orderId)
+                                                <a href="{{ route('customer.orderDetails', ['order' => $orderId]) }}"
+                                                    class="notification-details-btn"
+                                                    style="text-decoration: none; color: inherit;">
+                                                    View Details
+                                                </a>
+                                            @else
+                                                <button class="notification-details-btn" disabled>
+                                                    No Details
+                                                </button>
+                                            @endif
                                         </div>
+
                                         <div class="notification-details">
                                             @if ($imageUrl)
                                                 <img src="{{ $imageUrl }}" alt="Notification Image"
                                                     class="notification-img">
                                             @endif
+
                                             <div class="notification-info">
-                                                <div class="notification-desc">
-                                                    {!! $notification->message !!}
-                                                </div>
+                                                <div class="notification-desc">{!! $notification->message !!}</div>
                                                 <div class="notification-date">
-                                                    {{ $notification->created_at->format('m/d/Y H:i') }}
-                                                </div>
+                                                    {{ $notification->created_at->format('M d, Y h:i A') }}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -375,6 +474,7 @@
                                         <p>No notifications found.</p>
                                     </div>
                                 @endforelse
+
 
                             </div>
                         </div>
@@ -398,13 +498,15 @@
 
         <script src="{{ asset('js/customer/delivery.js') }}"></script>
         <script>
-            // close button for cancl request modal
-            document.querySelectorAll('.modal-cancel').forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.getAttribute('data-target');
-                    document.getElementById(targetId).style.display = 'none';
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.modal-cancel').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const targetId = button.getAttribute('data-target');
+                        document.getElementById(targetId).style.display = 'none';
+                    });
                 });
             });
         </script>
+
     </div>
 </x-customer-layout>

@@ -267,3 +267,68 @@ body.sidebar-expanded .product-management-content {
         font-size: 0.9rem;
     }
 }
+
+
+/* Table column widths */
+.pm-table th:nth-child(1),
+/* Image */
+.pm-table td:nth-child(1) {
+    width: 80px;
+    /* fixed for image */
+}
+
+.pm-table th:nth-child(2),
+/* ID */
+.pm-table td:nth-child(2) {
+    width: 60px;
+}
+
+.pm-table th:nth-child(3),
+/* Name */
+.pm-table td:nth-child(3) {
+    width: 200px;
+    text-align: left;
+    padding-left: 16px;
+}
+
+.pm-table th:nth-child(4),
+/* Category */
+.pm-table td:nth-child(4),
+.pm-table th:nth-child(5),
+/* Sub Category */
+.pm-table td:nth-child(5) {
+    width: 140px;
+    text-align: left;
+    padding-left: 16px;
+}
+
+.pm-table th:nth-child(6),
+/* Price */
+.pm-table td:nth-child(6) {
+    width: 100px;
+}
+
+.pm-table th:nth-child(7),
+/* Status */
+.pm-table td:nth-child(7) {
+    width: 90px;
+}
+
+.pm-table th:nth-child(8),
+/* Action */
+.pm-table td:nth-child(8) {
+    width: 130px;
+}
+
+.pm-status {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+.pm-status:focus {
+    border-color: var(--accent-dark-blue);
+    outline: none;
+    transition: ease-in-out 0.2s;
+}

@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --primary-dark: #304C89;
+    --primary: #648DE5;
+    --accent: #FF914D;
+    --accent-hover: #E67E3D;
+    --white: #ffffff;
+    --gray: #f8f8f8;
+    --dark-gray: #464747;
+}
+
+* {
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+}
+
+.settings-content {
+    margin-top: 80px;
+    margin-left: 20px;
+    padding: 32px;
+    transition: margin-left 0.3s cubic-bezier(.4, 0, .2, 1);
+}
+
+.settings-content h2 {
+    font-weight: 500;
+    color: var(--primary-dark);
+    margin-bottom: 6px;
+}
+
+.settings-subtitle {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+}
+
+.settings-alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.settings-alert.success {
+    background-color: #d1f7c4;
+    color: #1e7e34;
+}
+
+/* Settings Form */
+.settings-form {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    max-width: 600px;
+}
+
+.settings-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.settings-label {
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--dark-gray);
+}
+
+.settings-input {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.settings-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.settings-note {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.settings-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.settings-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s ease;
+}
+
+.settings-btn:hover {
+    background: var(--accent-hover);
+}
+
+/* Sidebar Adjustments */
+body.sidebar-expanded .settings-content {
+    margin-left: 150px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .settings-content {
+        margin-left: 0;
+        padding: 16px;
+    }
+
+    .settings-form {
+        padding: 20px;
+    }
+}

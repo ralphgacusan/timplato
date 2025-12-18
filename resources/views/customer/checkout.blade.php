@@ -54,7 +54,7 @@
                                     <th></th>
                                     <th>Product</th>
                                     <th>Unit Price</th>
-                                    <th>Quantity</th>
+                                    <th>Qty</th>
                                     <th>Item Subtotal</th>
                                 </tr>
                             </thead>
@@ -74,19 +74,28 @@
                                         </td>
                                         <td>
                                             <div class="fw-semibold">{{ $item->product->name }}</div>
-                                            <div class="text-muted" style="font-size:0.95rem;">
+                                            <div class="text-muted"
+                                                style="font-size:0.95rem; 
+                              white-space: nowrap; 
+                              overflow: hidden; 
+                              text-overflow: ellipsis; 
+                              max-width: 300px;">
                                                 {{ $item->product->description ?? 'No description' }}
                                             </div>
+
                                         </td>
                                         <td>₱{{ number_format($item->product->price, 2) }}</td>
+                                        </td>
                                         <td>{{ $item->quantity }}x</td>
                                         <td>₱{{ number_format($item->product->price * $item->quantity, 2) }}</td>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                    <div class="mt-3 text-end fw-semibold">Order Total: <span>₱{{ number_format($subtotal, 2) }}</span>
+                    <div class="mt-3 text-end fw-semibold">Order Total:
+                        <span>₱{{ number_format($subtotal, 2) }}</span>
                     </div>
                 </div>
             </div>
@@ -109,65 +118,43 @@
 
                     <div class="fw-semibold mb-2">Payment Details:</div>
                     <div class="d-flex justify-content-between mb-2"><span>Subtotal:</span>
-                        <span>₱{{ number_format($subtotal, 2) }}</span>
+                        <span>{{ $settings['currency'] }}{{ number_format($subtotal, 2) }}</span>
                     </div>
 
                     <!-- Delivery Methods -->
                     <div class="mb-2">Choose a delivery method</div>
-                    @php
-                        $deliveryMethods = [
-                            [
-                                'id' => 'deliveryPremium',
-                                'name' => 'Premium Delivery',
-                                'fee' => 100,
-                                'desc' => 'Delivered in 2 days',
-                            ],
-                            [
-                                'id' => 'deliveryNamed',
-                                'name' => 'Named Day Delivery',
-                                'fee' => 150,
-                                'desc' => 'Fit for your scheduled delivery',
-                            ],
-                            [
-                                'id' => 'deliveryStandard',
-                                'name' => 'Standard Delivery',
-                                'fee' => 0,
-                                'desc' => '2-5 working days delivery',
-                            ],
-                        ];
-                    @endphp
+
                     @foreach ($deliveryMethods as $method)
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio" name="deliveryMethod"
-                                id="{{ $method['id'] }}" value="{{ $method['name'] }}"
-                                data-fee="{{ $method['fee'] }}" {{ $loop->last ? 'checked' : '' }}>
-                            <label class="form-check-label" for="{{ $method['id'] }}">
-                                {{ $method['name'] }} <span
-                                    class="ms-2">{{ $method['fee'] > 0 ? '₱' . $method['fee'] : 'FREE' }}</span>
-                                <span class="text-muted ms-2">{{ $method['desc'] }}</span>
+                                id="delivery{{ $method->id }}" value="{{ $method->name }}"
+                                data-fee="{{ $method->fee }}" {{ $loop->last ? 'checked' : '' }}>
+                            <label class="form-check-label" for="delivery{{ $method->id }}">
+                                {{ $method->name }}
+                                <span
+                                    class="ms-2">{{ $method->fee > 0 ? $settings['currency'] . number_format($method->fee) : 'FREE' }}</span>
+                                <span class="text-muted ms-2">{{ $method->description }}</span>
                             </label>
                         </div>
                     @endforeach
 
+
                     <!-- Payment Methods -->
                     <div class="fw-semibold mt-4 mb-2">Payment Method</div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCOD"
-                            value="COD" checked>
-                        <label class="form-check-label" for="paymentCOD">Cash on Delivery</label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="paymentGCash"
-                            value="GCash">
-                        <label class="form-check-label" for="paymentGCash">Payment Center / E-Wallet <span
-                                class="text-muted">GCash</span></label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCard"
-                            value="Card">
-                        <label class="form-check-label" for="paymentCard">Credit / Debit Card <span
-                                class="text-muted">All banks accepted</span></label>
-                    </div>
+
+                    @foreach ($paymentMethods as $method)
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                id="payment{{ $method->name }}" value="{{ $method->name }}"
+                                {{ $loop->first ? 'checked' : '' }}> {{-- ✅ Default select first --}}
+                            <label class="form-check-label" for="payment{{ $method->name }}">
+                                {{ $method->name }}
+                                @if ($method->description)
+                                    <span class="text-muted">{{ $method->description }}</span>
+                                @endif
+                            </label>
+                        </div>
+                    @endforeach
 
                     <!-- Coupon -->
                     <div class="input-group mb-2 mt-3">
@@ -178,11 +165,11 @@
                     <div id="voucherMessage" style="height: 20px; margin-bottom: 10px; font-size: 0.9rem;"></div>
 
                     <div class="d-flex justify-content-between mb-2">
-                        <span>Discount:</span> <span id="discountAmount">₱0.00</span>
+                        <span>Discount:</span> <span id="discountAmount">{{ $settings['currency'] }}0.00</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 fw-semibold">
                         <span>Total Payment:</span>
-                        <span id="totalPayment">₱{{ number_format($subtotal, 2) }}</span>
+                        <span id="totalPayment">{{ $settings['currency'] }}{{ number_format($subtotal, 2) }}</span>
                     </div>
 
                     @if (!Auth::user()->getFullAddress() || !Auth::user()->phone)
@@ -203,6 +190,7 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const subtotal = {{ $subtotal }};
+                const currency = "{{ $settings['currency'] }}"; // ✅ Pass PHP currency to JS
                 let deliveryFee = 0;
                 let discount = 0;
 
@@ -216,9 +204,9 @@
                 function updateTotal() {
                     const total = subtotal + deliveryFee - discount;
                     totalPaymentEl.textContent =
-                        `₱${total.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                        `${currency}${total.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
                     discountEl.textContent =
-                        `-₱${discount.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                        `-${currency}${discount.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
                 }
 
                 // Delivery fee change
@@ -229,50 +217,51 @@
                     });
                 });
 
-                // Apply voucher
-                applyVoucherBtn.addEventListener('click', () => {
+                applyVoucherBtn.addEventListener('click', async () => {
                     const code = voucherInput.value.trim().toUpperCase();
-
-                    switch (code) {
-                        case 'ALDEN50':
-                            discount = 50;
-                            voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
-                            voucherMessageEl.style.color = 'green';
-                            break;
-                        case 'DEENICE10P':
-                            discount = (subtotal + deliveryFee) * 0.10;
-                            voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
-                            voucherMessageEl.style.color = 'green';
-                            break;
-                        case 'JOMSPOGI100':
-                            discount = 100;
-                            voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
-                            voucherMessageEl.style.color = 'green';
-                            break;
-                        case 'BAYUCAN20P':
-                            discount = (subtotal + deliveryFee) * 0.20;
-                            voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
-                            voucherMessageEl.style.color = 'green';
-                            break;
-                        case 'GACUSAN30':
-                            discount = (subtotal + deliveryFee) * 0.30;
-                            voucherMessageEl.textContent = `Voucher "${code}" applied successfully!`;
-                            voucherMessageEl.style.color = 'green';
-                            break;
-                        default:
-                            discount = 0;
-                            voucherMessageEl.textContent = `Invalid voucher code.`;
-                            voucherMessageEl.style.color = 'red';
+                    if (!code) {
+                        voucherMessageEl.textContent = "Please enter a voucher code.";
+                        voucherMessageEl.style.color = 'red';
+                        return;
                     }
 
-                    updateTotal();
-                });
+                    try {
+                        const url =
+                            `/voucher/validate?code=${encodeURIComponent(code)}&subtotal=${encodeURIComponent(subtotal)}&shipping=${encodeURIComponent(deliveryFee)}`;
+                        const res = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+                        const data = await res.json();
 
+                        if (!res.ok) {
+                            voucherMessageEl.textContent = data.message || 'Invalid response from server.';
+                            voucherMessageEl.style.color = 'red';
+                            discount = 0;
+                        } else if (data.valid) {
+                            discount = parseFloat(data.discount) || 0;
+                            voucherMessageEl.textContent = `Voucher "${data.code}" applied successfully!`;
+                            voucherMessageEl.style.color = 'green';
+                        } else {
+                            discount = 0;
+                            voucherMessageEl.textContent = data.message || 'Invalid voucher code.';
+                            voucherMessageEl.style.color = 'red';
+                        }
+                        updateTotal();
+                    } catch (err) {
+                        console.error('Voucher validation error:', err);
+                        voucherMessageEl.textContent = "Something went wrong. Please try again.";
+                        voucherMessageEl.style.color = 'red';
+                    }
+                });
 
                 // Initialize total
                 updateTotal();
             });
         </script>
+
 
     </div>
 

@@ -30,9 +30,10 @@
                         <button class="help-category-btn" data-category="coupons">
                             <span class="help-category-icon coupons"></span> Coupons/Vouchers
                         </button>
-                        <button class="help-category-btn" data-category="policies" disabled>
+                        <button class="help-category-btn" data-category="policies" disabled style="visibility: hidden;">
                             <span class="help-category-icon policies"></span> Policies
                         </button>
+
                     </div>
                 </div>
 
@@ -67,69 +68,24 @@
 
     <script>
         // Help Center Content Data
-        const helpData = {
-            shop: {
-                category: 'Shop with Timplato',
-                items: [{
-                        title: 'New to Timplato',
-                        content: 'Timplato was founded in 2025 to address a common challenge faced by many Filipino households: finding affordable yet reliable kitchenware in one convenient place. Local shops often lack variety, while imported products can be too expensive or difficult to access. To bridge this gap, Timplato was created as an e-commerce platform dedicated to providing quality, affordable, and practical kitchen tools. The name “Timplato” comes from two Filipino words, “timpla” (to mix or season) and “plato” (plate), symbolizing the company’s goal of helping people prepare and enjoy meals with the right tools.'
-                    },
-                    {
-                        title: 'Products on Timplato',
-                        content: 'Timplato focuses exclusively on kitchenware, offering cookware, utensils, food preparation tools, and tableware. What sets it apart is its commitment to promoting Filipino-made products, combining convenience, culture, and quality in one trusted online marketplace.'
-                    },
-                    {
-                        title: 'Checkout',
-                        content: '<b>1st Step:</b> You can order your preferred product if you go to the “Product Page”<br><b>2nd Step:</b> If you like any items you can add those in the “Cart” or “Wishlist”<br><b>3rd Step:</b> If you wish to buy the item, you can go to the cart, edit the number of product you want to buy, insert any coupon/voucher and checkout your preferred product.<br><b>4th Step:</b> If you wish to check out your preferred product, choose a payment method and delivery method that fits your preference.<br><b>5th Step:</b> You can now click the checkout button and wait for your order to arrive!<br><b>6th Step (Optional):</b> If you checked out the wrong item or forgot to check out an item, you can cancel your order to check out the right item again.'
-                    }
-                ]
-            },
-            general: {
-                category: 'General',
-                items: [{
-                        title: 'How do I remove a kitchenware item from my cart?',
-                        content: 'Open your cart, find the item you want to remove, and tap Remove. The item will be deleted immediately.'
-                    },
-                    {
-                        title: 'Why can’t I complete my order during checkout?',
-                        content: 'This could be due to incomplete details, unavailable items, or payment issues. Double-check your shipping address, kitchenware availability, and payment method.'
-                    }
-                ]
-            },
-            payment: {
-                category: 'Payment',
-                items: [{
-                    title: 'How do I choose the payment method for my order?',
-                    content: 'At checkout, under Payment Method, you can choose between Cash on Delivery (COD), Payment Center / E-wallet GCash, and Credit / Debit Card.'
-                }]
-            },
-            shipping: {
-                category: 'Orders & Shipping',
-                items: [{
-                    title: 'How do I choose a delivery </br> method for my kitchenware?',
-                    content: 'At checkout, choose your delivery method under the Payment Details, and choose between Standard Delivery, Named Day Delivery, and Premium Delivery.'
-                }]
-            },
-            coupons: {
-                category: 'Coupons/Vouchers',
-                items: [{
-                        title: 'Using Coupons',
-                        content: 'How are voucher discounts applied during checkout? Voucher discounts are applied automatically once you select and confirm a valid voucher that matches the item or order.'
-                    },
-                    {
-                        title: 'How do I apply a coupon/voucher at checkout?',
-                        content: 'At checkout, tap the Coupon/Voucher textfield, type the promo code that you want to use, and the discount will appear in your order summary.'
-                    }
-                ]
-            },
-            policies: {
-                category: 'Policies',
-                items: [{
-                    title: 'Policies',
-                    content: 'Read about our policies regarding returns, privacy, and more.'
-                }]
-            }
-        };
+        // Convert PHP sections into JS object
+        const helpData = {!! json_encode(
+            $sections->mapWithKeys(function ($group, $key) {
+                // Parse JSON content safely
+                $content = [];
+                if (isset($group[0]) && ($decoded = json_decode($group[0]->content, true))) {
+                    $content = $decoded;
+                }
+                return [
+                    $key => [
+                        'category' => $group[0]->title ?? ucfirst($key),
+                        'items' => $content,
+                    ],
+                ];
+            }),
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE,
+        ) !!};
+
 
         // Render Help Content
         function renderHelpContent(categoryKey, itemIndex = 0) {

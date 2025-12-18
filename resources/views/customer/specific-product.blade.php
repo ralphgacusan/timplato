@@ -29,7 +29,27 @@
             <div class="product-brand">
                 {{ $product->category->name ?? 'No Category' }} &nbsp;|&nbsp; ID: {{ $product->product_id }}
             </div>
-            <div class="product-rating">&#9733;&#9733;&#9733;&#9733;&#189; &nbsp; 4.5 | 2017 Reviews</div>
+            @php
+                $avgRating = $product->reviews()->avg('rating'); // e.g., 4.25
+                $reviewCount = $product->reviews()->count(); // e.g., 201
+                $fullStars = floor($avgRating); // 4
+                $halfStar = $avgRating - $fullStars >= 0.5; // true if half star
+            @endphp
+            <div class="product-rating">
+                @for ($i = 0; $i < $fullStars; $i++)
+                    &#9733; <!-- Full star -->
+                @endfor
+
+                @if ($halfStar)
+                    &#189; <!-- or you can use a half star icon -->
+                @endif
+
+                @for ($i = 0; $i < 5 - $fullStars - ($halfStar ? 1 : 0); $i++)
+                    &#9734; <!-- Empty star -->
+                @endfor
+
+                &nbsp; {{ number_format($avgRating, 1) }} | {{ $reviewCount }} Review/s
+            </div>
             <div class="product-price">₱{{ number_format($product->price, 2) }}</div>
 
             <!-- Stock Info -->

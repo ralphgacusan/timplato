@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Banner;
+use App\Models\Page;
+use App\Models\AdminLog;
+
+
 use App\Models\ProductImage;
 use App\Models\StockTransaction;
 
@@ -15,67 +20,109 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
-    // Landing Page
-    public function landingPage(){
-        return view('customer.home');
+public function landingPage()
+{
+    $categories = Category::with('parent')->get();
+
+    $bestSellers = Product::with('primaryImage')
+        ->where('status', true)
+        ->orderByDesc('sold')
+        ->take(10)
+        ->get();
+
+    $newArrivals = Product::with('primaryImage')
+        ->where('status', true)
+        ->latest()
+        ->take(10)
+        ->get();
+
+
+    $banners = Banner::where('slug', 'home')
+        ->where('active', true)
+        ->orderBy('order', 'asc')
+        ->get();
+
+    // ✅ Fetch separate hero content for guest and auth
+    $heroGuest = Page::where('slug', 'home-hero-guest')->first();
+    $heroAuth = Page::where('slug', 'home-hero-auth')->first();
+
+    return view('customer.home', compact('categories', 'bestSellers', 'newArrivals', 'banners', 'heroGuest', 'heroAuth'));
+}
+
+public function products(Request $request)
+{
+    $query = Product::with(['category', 'images'])->where('status', true); // only active products
+
+    // 🔍 Search Filter
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%')
+              ->orWhere('description', 'like', '%' . $request->search . '%');
+        });
     }
-    
-    // CUSTOMER SIDE
-    public function products(Request $request)
-    {
-        // Start query
-        $query = Product::with(['category', 'images']);
 
-        // 🔎 Search filter
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('description', 'like', '%' . $request->search . '%');
-            });
+    // 📂 Main Categories Filter (multiple)
+    if ($request->filled('main_category')) {
+        $mainCategories = Category::whereIn('name', $request->main_category)->get();
+        $mainCategoryIds = [];
+        foreach ($mainCategories as $cat) {
+            $mainCategoryIds = array_merge($mainCategoryIds, $cat->allChildrenIds());
         }
-
-        // 📂 Category filter
-        if ($request->has('category') && !empty($request->category)) {
-            $category = Category::where('name', $request->category)->first();
-
-            if ($category) {
-                $ids = $category->allChildrenIds(); // include parent + children
-                $query->whereIn('category_id', $ids);
-            }
-        }
-
-        // ↕️ Sorting
-        if ($request->has('sort') && !empty($request->sort)) {
-            switch ($request->sort) {
-                case 'az':
-                    $query->orderBy('name', 'asc');
-                    break;
-                case 'za':
-                    $query->orderBy('name', 'desc');
-                    break;
-                case 'price-asc':
-                    $query->orderBy('price', 'asc');
-                    break;
-                case 'price-desc':
-                    $query->orderBy('price', 'desc');
-                    break;
-                case 'date-asc': // Oldest first
-                    $query->orderBy('created_at', 'asc');
-                    break;
-                case 'date-desc': // Newest first
-                    $query->orderBy('created_at', 'desc');
-                    break;
-            }
-        } else {
-            // Default sort by newest
-            $query->orderBy('created_at', 'desc');
-        }
-
-        // Fetch products
-        $products = $query->paginate(30)->withQueryString();
-
-        return view('customer.products', compact('products'));
+        $query->whereIn('category_id', $mainCategoryIds);
     }
+
+    // 📂 Sub Categories Filter (multiple)
+    if ($request->filled('sub_category')) {
+        $subCategories = Category::whereIn('name', $request->sub_category)->get();
+        $subCategoryIds = $subCategories->pluck('category_id')->toArray();
+        $query->whereIn('category_id', $subCategoryIds);
+    }
+
+    // 💰 Price Range Filter
+    if ($request->filled('min_price')) {
+        $query->where('price', '>=', $request->min_price);
+    }
+    if ($request->filled('max_price')) {
+        $query->where('price', '<=', $request->max_price);
+    }
+
+    // 🔤 Sort by Name
+    if ($request->filled('sort_name')) {
+        $query->orderBy('name', $request->sort_name === 'az' ? 'asc' : 'desc');
+    }
+
+    // 💸 Sort by Price
+    if ($request->filled('sort_price')) {
+        $query->orderBy('price', $request->sort_price === 'asc' ? 'asc' : 'desc');
+    }
+
+    // 🕒 Sort by Date
+    if ($request->filled('sort_date')) {
+        $query->orderBy('created_at', $request->sort_date === 'newest' ? 'desc' : 'asc');
+    }
+
+    // 🔹 Sort by Rating
+    if ($request->filled('sort_rating')) {
+        // Sort by average rating (join with reviews)
+        $query->withAvg('reviews', 'rating') // adds reviews_avg_rating
+            ->orderBy('reviews_avg_rating', $request->sort_rating === 'asc' ? 'asc' : 'desc');
+    }
+
+    // 🔹 Sort by Sold
+    if ($request->filled('sort_sold')) {
+        $query->orderBy('sold', $request->sort_sold === 'asc' ? 'asc' : 'desc');
+    }
+
+    // Default sort if no sort selected
+    if (!$request->filled('sort_name') && !$request->filled('sort_price') && !$request->filled('sort_date')) {
+        $query->orderBy('created_at', 'desc'); // newest by default
+    }
+
+    // Paginate and keep filters in query string
+    $products = $query->paginate(30)->withQueryString();
+
+    return view('customer.products', compact('products'));
+}
 
 
     // Show a specific product
@@ -108,6 +155,12 @@ class ProductController extends Controller
         if ($request->has('search') && !empty($request->search)) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
+
+                // Status filter
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('status', $request->status); // 1 = Active, 0 = Inactive
+        }
+
 
         // 📂 Category filter
         if ($request->has('category') && !empty($request->category)) {
@@ -197,7 +250,6 @@ class ProductController extends Controller
 
         $validated = $validator->validated();
 
-        // Create the product
         $product = Product::create([
             'name'           => $validated['name'],
             'description'    => $validated['description'] ?? null,
@@ -205,7 +257,9 @@ class ProductController extends Controller
             'stock_quantity' => $validated['stock_quantity'],
             'restock_level'  => $validated['restock_level'] ?? null,
             'category_id'    => $validated['subcategory_id'],
+            'status'         => $request->input('status') == '1', // ✅ fix
         ]);
+
 
         // Handle multiple image uploads
         if ($request->hasFile('images')) {
@@ -225,6 +279,13 @@ class ProductController extends Controller
                 ]);
             }
         }
+
+        $this->logAdminAction(
+            'Created Product',
+            'Product',
+            $product->product_id,
+            "Added new product: {$product->name}"
+        );
 
 
         return redirect()->route('admin.product-management')
@@ -274,14 +335,16 @@ class ProductController extends Controller
         $validated = $validator->validated();
 
         // Update the product
-        $product->update([
+       $product->update([
             'name'           => $validated['name'],
             'description'    => $validated['description'] ?? null,
             'price'          => $validated['price'],
             'stock_quantity' => $validated['stock_quantity'],
             'restock_level'  => $validated['restock_level'] ?? null,
             'category_id'    => $validated['subcategory_id'] ?? $validated['category_id'],
+            'status'         => $request->input('status') == '1', // ✅ fix
         ]);
+
 
         // Handle deleted images
         if ($request->filled('deleted_images')) {
@@ -312,6 +375,13 @@ class ProductController extends Controller
             }
         }
 
+        $this->logAdminAction(
+            'Updated Product',
+            'Product',
+            $product->product_id,
+            "Updated product: {$product->name}"
+        );
+
         return redirect()->route('admin.product-management')
                         ->with('success', 'Product updated successfully!');
         // dd($request->deleted_images);
@@ -325,6 +395,12 @@ class ProductController extends Controller
     {
         $product->images()->delete(); // delete images first if you want
         $product->delete();
+        $this->logAdminAction(
+            'Deleted Product',
+            'Product',
+            $product->product_id,
+            "Deleted product: {$product->name}"
+        );
         return redirect()->route('admin.product-management')->with('success', 'Product deleted successfully!');
     }
 
@@ -435,6 +511,13 @@ class ProductController extends Controller
             'performed_by' => Auth::user()->getFullName(), // store full name of auth user
         ]);
 
+        $this->logAdminAction(
+            ucfirst($request->type) . ' Stock',
+            'Product',
+            $product->product_id,
+            ucfirst($request->type) . "ed {$request->quantity} units for {$product->name}"
+        );
+
         return redirect()->route('admin.inventory-management')->with('success', 'Stock updated successfully.');
     }
 
@@ -463,6 +546,20 @@ class ProductController extends Controller
     //     $product->delete();
     //     return redirect()->route('admin.inventory.index')->with('success', 'Product deleted successfully.');
     // }
+
+
+    // Protected helper to log admin actions
+    protected function logAdminAction($action, $targetType = null, $targetId = null, $details = null)
+    {
+        AdminLog::create([
+            'admin_id' => auth()->id(),
+            'action' => $action,
+            'target_type' => $targetType,
+            'target_id' => $targetId,
+            'details' => $details,
+            'ip_address' => request()->ip(),
+        ]);
+    }
 
 
 }

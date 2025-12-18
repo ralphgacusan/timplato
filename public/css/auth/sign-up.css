@@ -149,22 +149,36 @@
 .buttonsRow {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    /* space between buttons */
     align-items: center;
-    width: 100%;
-
-}
-
-.buttonsRow form {
+    gap: 1rem;
     width: 100%;
 }
 
-/* All buttons in this row same width as input fields */
-.buttonsRow .formButton {
+/* Container for side-by-side buttons */
+.buttonGroup {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 520px;
+    /* optional: aligns with input width */
+}
+
+/* Make all buttons equal width inside the buttonGroup */
+.buttonGroup>* {
+    flex: 1;
+}
+
+/* Ensure inner form behaves like a flex item */
+.buttonGroup form {
+    display: flex;
+    flex: 1;
+}
+
+/* Make button fill its container */
+.buttonGroup .formButton {
     width: 100%;
     padding: 12px 0;
-    /* same height for both */
     font-size: 1.1rem;
 }
 

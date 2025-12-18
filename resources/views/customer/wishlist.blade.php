@@ -21,32 +21,35 @@
 
                         <div class="wishlist-info">
                             <div class="wishlist-title">{{ $item->product->name }}</div>
-                            <div class="wishlist-desc">{{ $item->product->description ?? 'No description available' }}
+                            <div class="wishlist-desc">
+                                {{ \Illuminate\Support\Str::limit($item->product->description ?? 'No description available', 50) }}
                             </div>
-                            <span class="wishlist-price">₱{{ number_format($item->product->price, 2) }}</span>
-                        </div>
 
-                        <div class="wishlist-actions">
-                            {{-- <form action="{{ route('customer.add-to-cart', $item->product->product_id) }}"
+                        </div>
+                        <span class="wishlist-price">₱{{ number_format($item->product->price, 2) }}</span>
+                    </div>
+
+                    <div class="wishlist-actions">
+                        {{-- <form action="{{ route('customer.add-to-cart', $item->product->product_id) }}"
                                 method="POST">
                                 @csrf
                                 <button type="submit" class="wishlist-cart-btn">Add to Cart</button>
                             </form> --}}
 
-                            <form action="{{ route('customer.wishlist.remove', $item->product->product_id) }}"
-                                method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="wishlist-remove-btn">Remove</button>
-                            </form>
-                        </div>
+                        <form action="{{ route('customer.wishlist.remove', $item->product->product_id) }}"
+                            method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="wishlist-remove-btn">Remove</button>
+                        </form>
                     </div>
-                </a>
-                <hr>
-            @empty
-                <p>No products in your wishlist.</p>
-            @endforelse
         </div>
+        </a>
+        <hr>
+    @empty
+        <p>No products in your wishlist.</p>
+        @endforelse
+    </div>
 
     </div>
 

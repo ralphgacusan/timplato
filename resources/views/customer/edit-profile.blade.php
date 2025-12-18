@@ -48,25 +48,30 @@
                                     value="{{ Auth::user()->first_name }}" required>
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label">Middle Name (Optional)</label>
+                                <input type="text" class="form-control" name="middle_name"
+                                    value="{{ Auth::user()->middle_name }}">
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label">Last Name</label>
                                 <input type="text" class="form-control" name="last_name"
                                     value="{{ Auth::user()->last_name }}" required>
                             </div>
+
+                        </div>
+                        <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Gender</label>
-                                <select class="form-select" name="gender">
-                                    <option value="male" {{ Auth::user()->gender == 'male' ? 'selected' : '' }}>Male
-                                    </option>
-                                    <option value="female" {{ Auth::user()->gender == 'female' ? 'selected' : '' }}>
-                                        Female</option>
-                                    <option value="other" {{ Auth::user()->gender == 'other' ? 'selected' : '' }}>
-                                        Other</option>
-                                </select>
+
+                                <input type="text" class="form-control" value="{{ ucfirst($user->gender) }}"
+                                    readonly>
+                                <input type="hidden" class="form-control" name="gender" value="{{ $user->gender }}"
+                                    readonly>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Date of Birth</label>
                                 <input type="date" class="form-control" name="date_of_birth"
-                                    value="{{ Auth::user()->date_of_birth?->format('Y-m-d') }}">
+                                    value="{{ Auth::user()->date_of_birth?->format('Y-m-d') }}" readonly>
                             </div>
                         </div>
 
@@ -74,12 +79,12 @@
                             <div class="col-md-6">
                                 <label class="form-label">Phone Number</label>
                                 <input type="text" class="form-control" name="phone"
-                                    value="{{ Auth::user()->phone ?? '' }}">
+                                    value="{{ Auth::user()->phone }}" readonly>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Email Address</label>
                                 <input type="email" class="form-control" name="email"
-                                    value="{{ Auth::user()->email }}" required>
+                                    value="{{ Auth::user()->email }}" readonly>
                             </div>
                         </div>
 
@@ -90,6 +95,8 @@
                         </div>
                     </div>
                 </div>
+
+
             </div>
         </form>
         <!-- Form ends here -->

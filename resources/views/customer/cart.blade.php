@@ -62,7 +62,10 @@
                 Subtotal: <span
                     class="cart-summary-value">₱{{ number_format($cart->items->sum(fn($i) => $i->product->price * $i->quantity), 2) }}</span>
             </div>
-            <div class="cart-summary-row">Delivery: <span class="cart-summary-value">FREE</span></div>
+            <div class="cart-summary-row">
+                <span>Delivery Fee:</span>
+                <span id="deliveryFee" class="cart-summary-value">₱50.00</span>
+            </div>
             <hr>
             {{-- <div class="cart-summary-row">
                 <input type="text" class="cart-coupon-input" placeholder="Coupon/Voucher">
@@ -84,6 +87,32 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
             $(document).ready(function() {
+                let baseDeliveryFee = 50;
+
+                // ✅ Initial subtotal calculation when the page loads
+                function updateTotals() {
+                    let subtotal = 0;
+                    $('.cart-qty-total').each(function() {
+                        subtotal += parseFloat($(this).text().replace('₱', '').replace(/,/g, '')) || 0;
+                    });
+
+                    // Update subtotal (without delivery fee)
+                    $('.cart-summary-value').first().text('₱' + subtotal.toLocaleString('en-US', {
+                        minimumFractionDigits: 2
+                    }));
+
+                    // Add delivery fee for total
+                    let total = subtotal + baseDeliveryFee;
+
+                    $('.cart-summary-total .cart-summary-value').text('₱' + total.toLocaleString('en-US', {
+                        minimumFractionDigits: 2
+                    }));
+                }
+
+                // Run it once when the page loads
+                updateTotals();
+
+                // ✅ Quantity update logic
                 $('.cart-qty-btn').click(function(e) {
                     e.preventDefault();
 
@@ -102,20 +131,8 @@
                             $('#qty-' + cartItemId).text(response.quantity);
                             $('#total-' + cartItemId).text('₱' + response.total);
 
-                            // Update cart subtotal and order total
-                            let subtotal = 0;
-                            $('.cart-qty-total').each(function() {
-                                subtotal += parseFloat($(this).text().replace('₱', '')
-                                    .replace(/,/g, ''));
-                            });
-                            $('.cart-summary-value').first().text('₱' + subtotal.toLocaleString(
-                                'en-US', {
-                                    minimumFractionDigits: 2
-                                }));
-                            $('.cart-summary-total .cart-summary-value').text('₱' + subtotal
-                                .toLocaleString('en-US', {
-                                    minimumFractionDigits: 2
-                                }));
+                            // ✅ Recalculate subtotal and total (with delivery fee)
+                            updateTotals();
                         }
                     });
                 });

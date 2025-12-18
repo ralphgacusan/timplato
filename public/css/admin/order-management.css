@@ -37,6 +37,25 @@
     margin-bottom: 18px;
 }
 
+/* Buttons */
+.om-btn {
+    margin-left: auto;
+    background: #FF914D;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+
+.om-btn:hover {
+    background: #E67E3D;
+}
+
+
 .om-sortby,
 .om-category,
 .om-search {

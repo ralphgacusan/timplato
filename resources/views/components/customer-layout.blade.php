@@ -45,8 +45,10 @@
                             <div class="notification-list">
                                 @forelse($notifications as $notification)
                                     @php
-                                        $imageUrl = null;
+                                        // Default placeholder image for manual/announcement notifications
+                                        $defaultImage = asset('timplatoLogo/Timplato-Blue-LOGO.png');
 
+                                        // Try to find product or order image first
                                         if ($notification->product?->primaryImage) {
                                             $imageUrl = asset(
                                                 'images/' . $notification->product->primaryImage->image_url,
@@ -58,27 +60,45 @@
                                                         ->image_url,
                                             );
                                         } else {
-                                            $imageUrl = asset('images/product-placeholder.png');
+                                            $imageUrl = $defaultImage; // ✅ fallback if none found
                                         }
                                     @endphp
 
-                                    <div class="notification-item">
-                                        <div class="notification-img">
-                                            <img src="{{ $imageUrl }}" alt="Notification Image"
-                                                style="width:40px;height:40px;object-fit:cover;">
-                                        </div>
-                                        <div class="notification-info">
-                                            <div class="notification-text">
-                                                {!! $notification->message !!}
+                                    @if ($notification->order)
+                                        <a href="{{ route('customer.orderDetails', ['order' => $notification->order->order_id]) }}"
+                                            class="notification-details-btn" style="text-decoration: none; color: inherit;">
+                                            <div class="notification-item">
+                                                <div class="notification-img">
+                                                    <img src="{{ $imageUrl }}" alt="Notification Image"
+                                                        style="width:40px;height:40px;object-fit:cover;">
+                                                </div>
+                                                <div class="notification-info">
+                                                    <div class="notification-text">{!! $notification->message !!}</div>
+                                                    <div class="notification-date">
+                                                        {{ $notification->created_at->format('M d, Y h:i A') }}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="notification-date">
-                                                {{ $notification->created_at->format('M d, Y H:i') }}
+                                        </a>
+                                    @else
+                                        {{-- Manual or announcement notification (no order link) --}}
+                                        <div class="notification-item">
+                                            <div class="notification-img">
+                                                <img src="{{ $imageUrl }}" alt="Notification Image"
+                                                    style="width:40px;height:40px;object-fit:cover;">
+                                            </div>
+                                            <div class="notification-info">
+                                                <div class="notification-text">{!! $notification->message !!}</div>
+                                                <div class="notification-date">
+                                                    {{ $notification->created_at->format('M d, Y h:i A') }}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 @empty
                                     <p class="text-center py-3">No notifications available.</p>
                                 @endforelse
+
                             </div>
                             <a href="{{ route('auth.user-profile', Auth::user()->id) }}#notifications-section"
                                 class="notification-viewall-btn">
@@ -154,15 +174,67 @@
 
         </main>
 
-        <!-- Footer -->
-        <div class="footer">
-            <a href="{{ route('customer.customer-support.index') }}" style="text-decoration: none; color: inherit;">
-                <p>Help Center</p>
-            </a>
 
-            <p>&copy; 2023 Timplato. All rights reserved.</p>
-        </div>
     </div>
+
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function() {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/690a3ba9f2bdd71954b77068/1j97vi3mt';
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+    <!--End of Tawk.to Script-->
+
+
+    <!-- Professional Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Customer Service</h3>
+                <ul>
+                    <li><a href="{{ route('customer.customer-support.index') }}">Help Center</a></li>
+                    <li><a href="{{ route('customer.privacy-policy') }}">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="{{ route('customer.about-us') }}">About Us</a></li>
+                    <li><a href="{{ route('customer.contact') }}">Contact Us</a></li>
+                    <li><a href="{{ route('customer.contact') }}">Reviews</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="#">Corporate</a></li>
+                    <li><a href="#">Community</a></li>
+                    <li><a href="#">Shopee Store</a></li>
+                    <li><a href="#">Lazada Store</a></li>
+                </ul>
+            </div>
+            <div class="footer-section footer-brand">
+                <img src="../timplatoLogo/Timplato-Blue-LOGO.png" alt="Timplato Logo" class="footer-logo">
+                <div class="footer-socials">
+                    <span>Follow Us</span>
+                    <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 <strong>Timplato</strong>. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script src="{{ asset('js/customer/navbar.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

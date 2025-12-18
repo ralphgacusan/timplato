@@ -88,6 +88,17 @@
         <!-- Sidebar -->
         <div class="side_bar" id="sidebar">
             <ul>
+
+                <li class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('admin.dashboard') }}">
+                        <div class="icon-container">
+                            <span class="icon-dashboard"></span>
+                        </div>
+                        <span class="sidebar-label">Dashboard</span>
+                    </a>
+                </li>
+
+
                 <li class="{{ request()->is('admin/products/*') ? 'active' : '' }}">
                     <a href="{{ route('admin.product-management') }}">
                         <div class="icon-container">
@@ -124,8 +135,8 @@
                     </a>
                 </li>
 
-                <li class="{{ request()->is('admin/sales-reports*') ? 'active' : '' }}">
-                    <a href="/">
+                <li class="{{ request()->is('admin/sales-analytics*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.sales-analytics') }}">
                         <div class="icon-container">
                             <span class="icon-barChart"></span>
                         </div>
@@ -134,7 +145,7 @@
                 </li>
 
                 <li class="{{ request()->is('admin/content-management*') ? 'active' : '' }}">
-                    <a href="/">
+                    <a href="{{ route('admin.cms') }}">
                         <div class="icon-container">
                             <span class="icon-file"></span>
                         </div>
@@ -143,7 +154,7 @@
                 </li>
 
                 <li class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
-                    <a href="/">
+                    <a href="{{ route('settings') }}">
                         <div class="icon-container">
                             <span class="icon-settings"></span>
                         </div>
@@ -152,7 +163,7 @@
                 </li>
 
                 <li class="{{ request()->is('admin/notification-management*') ? 'active' : '' }}">
-                    <a href="/">
+                    <a href=" {{ route('admin.notifications.index') }}">
                         <div class="icon-container">
                             <span class="icon-bell"></span>
                         </div>
@@ -161,7 +172,7 @@
                 </li>
 
                 <li class="{{ request()->is('admin/audit-trail*') ? 'active' : '' }}">
-                    <a href="/">
+                    <a href="{{ route('admin.audit-trail') }}">
                         <div class="icon-container">
                             <span class="icon-history"></span>
                         </div>

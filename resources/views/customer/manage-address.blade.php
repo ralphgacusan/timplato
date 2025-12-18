@@ -135,8 +135,15 @@
                                                             {{ $address->is_default ? 'checked' : '' }}>
                                                         <label class="form-check-label">Set as default</label>
                                                     </div>
+                                                    <input type="hidden" name="lat" id="lat">
+                                                    <input type="hidden" name="lng" id="lng">
+
                                                 </div>
                                                 <div class="modal-footer">
+                                                    <button type="button" class="btn btn-outline-primary w-100 mt-2"
+                                                        data-bs-toggle="modal" data-bs-target="#mapPickerModal">
+                                                        📍 Set Location on Map
+                                                    </button>
                                                     <button type="button" class="btn btn-secondary"
                                                         data-bs-dismiss="modal">Cancel</button>
                                                     <button type="submit" class="btn btn-warning">Save Changes</button>
@@ -201,8 +208,16 @@
                             <input class="form-check-input" type="checkbox" name="is_default" value="1">
                             <label class="form-check-label">Set as default</label>
                         </div>
+
+                        <input type="hidden" name="lat" id="lat">
+                        <input type="hidden" name="lng" id="lng">
+
                     </div>
                     <div class="modal-footer">
+                        {{-- <button type="button" class="btn btn-outline-primary w-100 mt-2" data-bs-toggle="modal"
+                            data-bs-target="#mapPickerModal">
+                            📍 Set Location on Map
+                        </button> --}}
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-warning">Add Address</button>
                     </div>
@@ -210,4 +225,31 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="mapPickerModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pick Location</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+                    <input id="searchInput" type="text" class="form-control mb-2"
+                        placeholder="Search address...">
+
+                    <div id="map" style="height: 500px; width:100%;"></div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" id="applyLocationBtn">Apply Location</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+    <script src="{{ asset('js/admin/map-address.js') }}"></script>
+
 </x-customer-layout>

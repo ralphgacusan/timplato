@@ -91,4 +91,91 @@ class UserAddressController extends Controller
 
         return redirect()->back()->with('success', 'Address deleted successfully!');
     }
+
+
+
+    // ADMIN SIDE
+
+    // Store new address for a specific user
+    public function adminStoreAddress(Request $request, $userId)
+    {
+        $request->validate([
+            'label' => 'required|string',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
+            'country' => 'required|string|max:100',
+            'lat' => 'nullable|numeric',
+            'lng' => 'nullable|numeric',        
+            'is_default' => 'nullable|boolean',
+        ]);
+
+        // If new address is default, reset other default addresses for this user
+        if ($request->has('is_default')) {
+            UserAddress::where('user_id', $userId)->update(['is_default' => false]);
+        }
+
+        // Create address for user
+        UserAddress::create([
+            'user_id' => $userId,
+            'label' => $request->label,
+            'address' => $request->address,
+            'city' => $request->city,
+            'state' => $request->state,
+            'zip_code' => $request->zip_code,
+            'country' => $request->country,
+            'lat' => $request->lat,
+            'lng' => $request->lng,
+            'is_default' => $request->has('is_default') ? true : false,
+        ]);
+
+        return redirect()->back()->with('success', 'Address added successfully!');
+    }
+
+    // Update an existing address
+    public function adminUpdateAddress(Request $request, $userId, $id)
+    {
+        $request->validate([
+            'label' => 'required|string',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
+            'country' => 'required|string|max:100',
+            'lat' => 'nullable|numeric',
+            'lng' => 'nullable|numeric',    
+            'is_default' => 'nullable|boolean',
+        ]);
+
+        $address = UserAddress::where('user_id', $userId)->findOrFail($id);
+
+        // If updated address is default, reset other default addresses for this user
+        if ($request->has('is_default')) {
+            UserAddress::where('user_id', $userId)->update(['is_default' => false]);
+        }
+
+        $address->update([
+            'label' => $request->label,
+            'address' => $request->address,
+            'city' => $request->city,
+            'state' => $request->state,
+            'zip_code' => $request->zip_code,
+            'country' => $request->country,
+            'lat' => $request->lat,
+            'lng' => $request->lng,
+            'is_default' => $request->has('is_default') ? true : false,
+        ]);
+
+        return redirect()->back()->with('success', 'Address updated successfully!');
+    }
+
+    // Delete an address
+    public function adminDestroyAddress($userId, $id)
+    {
+        $address = UserAddress::where('user_id', $userId)->findOrFail($id);
+        $address->delete();
+
+        return redirect()->back()->with('success', 'Address deleted successfully!');
+    }
 }

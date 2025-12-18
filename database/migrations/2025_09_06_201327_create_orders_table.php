@@ -20,22 +20,41 @@ return new class extends Migration
             $table->unsignedBigInteger('courier_id')->nullable();
 
             // Order details
-            $table->decimal('total_amount', 10, 2); 
+            $table->decimal('subtotal', 10, 2); // before discount/shipping
+            $table->decimal('discount_amount', 10, 2)->default(0);
+            $table->decimal('shipping_cost', 10, 2)->default(0);
+            
+            $table->decimal('total_amount', 10, 2); // final after all adjustments
+
+
             $table->enum('current_status', [
                 'pending',     // order placed, waiting for confirmation
                 'confirmed',   // confirmed by seller/admin
                 'processing',  // preparing / being packed
                 'shipped',     // handed over to courier
                 'delivered',   // successfully received by customer
+                'completed',          // ✅ new
                 'cancel_requested', // customer requested cancellation
                 'cancelled',   // cancelled by user or admin
+                'return_requested',   // ✅ new
+                'refund_requested',
+                'refund_approved',
+                'return_approved',   // ✅ new
                 'returned',    // returned by customer
                 'refunded',    // refunded to customer
             ])->default('pending');            
             $table->string('payment_method'); // cod, gcash, credit_card, etc.
+            $table->string('delivery_method'); // cod, gcash, credit_card, etc.
             $table->string('tracking_number')->nullable();
             $table->text('cancel_reason')->nullable();
             $table->timestamp('cancel_requested_at')->nullable();
+
+
+            $table->string('return_refund_type')->nullable(); // 'return' or 'refund'
+            $table->text('return_refund_reason')->nullable();
+            $table->timestamp('return_refund_requested_at')->nullable();
+
+
             $table->timestamps(); // created_at & updated_at
 
             // Foreign key constraints

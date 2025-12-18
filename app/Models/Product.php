@@ -20,6 +20,7 @@ class Product extends Model
         'restock_level',
         'sold',
         'category_id',
+        'status',
     ];
 
     /**

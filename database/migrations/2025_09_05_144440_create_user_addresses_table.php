@@ -20,6 +20,9 @@ return new class extends Migration
             $table->string('state')->nullable();
             $table->string('zip_code')->nullable();
             $table->string('country');
+            $table->decimal('lat', 10, 7)->nullable();
+            $table->decimal('lng', 10, 7)->nullable();
+
             $table->boolean('is_default')->default(false); // Default address
             $table->timestamps(); // created_at and updated_at
 

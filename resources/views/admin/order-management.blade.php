@@ -27,9 +27,9 @@
                     <option value="card" {{ request('mop') == 'card' ? 'selected' : '' }}>Credit/Debit Card</option>
                 </select>
 
-                <!-- Filter by Status -->
                 <select name="status" class="om-category" onchange="this.form.submit()">
                     <option value="">Status</option>
+
                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed
                     </option>
@@ -38,13 +38,33 @@
                     <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>Shipped</option>
                     <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Delivered
                     </option>
+                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed
+                    </option>
+
                     <option value="cancel_requested" {{ request('status') == 'cancel_requested' ? 'selected' : '' }}>
                         Cancel Requested</option>
                     <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
                     </option>
+
+                    <option value="return_requested" {{ request('status') == 'return_requested' ? 'selected' : '' }}>
+                        Return Requested</option>
+                    <option value="return_approved" {{ request('status') == 'return_approved' ? 'selected' : '' }}>
+                        Return Approved</option>
+                    <option value="refund_requested" {{ request('status') == 'refund_requested' ? 'selected' : '' }}>
+                        Refund Requested</option>
+                    <option value="refund_approved" {{ request('status') == 'refund_approved' ? 'selected' : '' }}>
+                        Refund Approved</option>
+
                     <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>Returned</option>
                     <option value="refunded" {{ request('status') == 'refunded' ? 'selected' : '' }}>Refunded</option>
                 </select>
+
+                <!-- 🔍 Search by User -->
+                <input type="text" name="search" placeholder="Search by user name or email"
+                    value="{{ request('search') }}" class="om-search-input"
+                    style="padding: 6px 12px; border-radius: 6px; border: 1px solid #ccc;">
+                <button type="submit" class="om-btn">Search</button>
+
             </form>
         </div>
 

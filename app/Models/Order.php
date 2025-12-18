@@ -11,19 +11,24 @@ class Order extends Model
 
     protected $primaryKey = 'order_id'; // Custom primary key
 
-    protected $fillable = [
+protected $fillable = [
     'user_id',
-    'rider_id',
-    'courier_id',
+    'subtotal',
+    'discount_amount',
+    'shipping_cost',
     'total_amount',
     'current_status',
     'payment_method',
+    'delivery_method',
     'tracking_number',
-    'discount_amount',       // new
-    'voucher_code',
     'cancel_reason',
-    'cancel_requested_at',   // new
+    'cancel_requested_at',
+    'return_refund_type',
+    'return_refund_reason',
+    'return_refund_requested_at',
 ];
+
+
 
     /**
      * Relationships
@@ -65,6 +70,20 @@ public function notifications()
     return $this->hasMany(Notification::class, 'order_id', 'order_id');
 }
 
+    // **Corrected Payment Relationship**
+public function payments()
+{
+    return $this->hasMany(Payment::class, 'order_id', 'order_id');
+}
+
+public function payment()
+{
+    return $this->hasOne(Payment::class, 'order_id', 'order_id');
+}
+
+protected $casts = [
+    'return_refund_requested_at' => 'datetime',
+];
 
 
 }

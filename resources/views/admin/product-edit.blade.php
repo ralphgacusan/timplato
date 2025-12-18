@@ -14,20 +14,103 @@
             <div class="add-product-grid">
                 <!-- LEFT: Name and Description -->
                 <div class="add-product-section add-product-desc">
-                    <h3>Name and Description</h3>
-                    <label for="name">Product Name</label>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <h3 style="margin: 0;">Name and Description</h3>
+
+                        <!-- Toggle -->
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-weight: 500;">Status:</span>
+                            <input type="hidden" name="status" value="0">
+                            <label class="switch">
+                                <input type="checkbox" id="status" name="status" value="1"
+                                    {{ old('status', $product->status ?? true) ? 'checked' : '' }}>
+                                <span class="slider round"></span>
+                            </label>
+                            <span id="statusLabel"
+                                style="font-size: 0.9rem; font-weight: 500; color: {{ old('status', $product->status ?? true) ? 'green' : 'gray' }}">
+                                {{ old('status', $product->status ?? true) ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Product Name -->
+                    <label for="name" style="margin-top: 1rem;">Product Name</label>
                     <input type="text" id="name" name="name" placeholder="Enter Product Name"
                         value="{{ old('name', $product->name) }}" required>
                     @error('name')
                         <span class="error-message" style="color:red; font-size:0.7rem;">{{ $message }}</span>
                     @enderror
 
-                    <label for="description">Product Description</label>
+                    <!-- Product Description -->
+                    <label for="description" style="margin-top: 1rem;">Product Description</label>
                     <textarea id="description" name="description" placeholder="Enter Description" rows="6" required>{{ old('description', $product->description) }}</textarea>
                     @error('description')
                         <span class="error-message" style="color:red; font-size:0.7rem;">{{ $message }}</span>
                     @enderror
                 </div>
+
+                <!-- Switch Styles -->
+                <style>
+                    .switch {
+                        position: relative;
+                        display: inline-block;
+                        width: 45px;
+                        height: 24px;
+                    }
+
+                    .switch input {
+                        opacity: 0;
+                        width: 0;
+                        height: 0;
+                    }
+
+                    .slider {
+                        position: absolute;
+                        cursor: pointer;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background-color: #ccc;
+                        transition: 0.4s;
+                        border-radius: 24px;
+                    }
+
+                    .slider:before {
+                        position: absolute;
+                        content: "";
+                        height: 18px;
+                        width: 18px;
+                        left: 3px;
+                        bottom: 3px;
+                        background-color: white;
+                        transition: 0.4s;
+                        border-radius: 50%;
+                    }
+
+                    input:checked+.slider {
+                        background-color: #0a143b;
+                        /* your site's primary color */
+                    }
+
+                    input:checked+.slider:before {
+                        transform: translateX(21px);
+                    }
+                </style>
+
+                <!-- Toggle Script -->
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const toggle = document.getElementById('status');
+                        const label = document.getElementById('statusLabel');
+                        if (toggle && label) {
+                            toggle.addEventListener('change', function() {
+                                label.textContent = this.checked ? 'Active' : 'Inactive';
+                                label.style.color = this.checked ? 'green' : 'gray';
+                            });
+                        }
+                    });
+                </script>
 
                 <!-- RIGHT: Pricing and Stocks -->
                 <div class="add-product-right">

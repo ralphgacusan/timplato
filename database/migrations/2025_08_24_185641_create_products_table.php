@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('sold')->default(0); // Total units sold
             $table->integer('restock_level')->nullable(); // Minimum quantity before restock alert
             $table->unsignedBigInteger('category_id'); // Foreign key to categories
+            $table->boolean('status')->default(true); // true = Active, false = Inactive
             $table->timestamps(); // created_at and updated_at
 
             // Foreign key constraint

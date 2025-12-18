@@ -105,7 +105,8 @@
 .icon-down:before,
 .icon-pencil:before,
 .icon-trash:before,
-.icon-eye:before {
+.icon-eye:before,
+.icon-dashboard:before {
     content: '';
     display: block;
     width: 25px;
@@ -142,6 +143,12 @@
     top: 6px;
     left: 0;
 }
+
+.icon-dashboard:before {
+    -webkit-mask-image: url("/SVG/dashboard.svg");
+    mask-image: url("/SVG/dashboard.svg");
+}
+
 
 .icon-package:before {
     -webkit-mask-image: url("/SVG/package.svg");

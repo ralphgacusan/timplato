@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id(); // Primary key
             $table->string('first_name'); // First name
+            $table->string('middle_name')->nullable(); // Middle Name
             $table->string('last_name');  // Last name
             $table->string('email')->unique(); // Unique email login
             $table->string('password'); // Hashed password
@@ -23,6 +24,9 @@ return new class extends Migration
             $table->enum('gender', ['male', 'female', 'prefer_not_to_say'])->nullable(); // Gender           
             $table->date('date_of_birth')->nullable(); // Date of birth
             $table->timestamp('last_login_at')->nullable();
+            $table->timestamp('last_logout_at')->nullable();
+
+            $table->timestamp('suspended_until')->nullable();
             $table->timestamps(); // created_at and updated_at
         });
 
