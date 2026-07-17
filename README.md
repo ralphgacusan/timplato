@@ -1,61 +1,446 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<a id="readme-top"></a>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+<!-- PROJECT SHIELDS -->
 
-## About Laravel
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com/)
+[![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net/)
+[![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
+[![PayMongo](https://img.shields.io/badge/PayMongo-Payment-0052CC?style=for-the-badge)](https://paymongo.com/)
+[![Google OAuth](https://img.shields.io/badge/Google-OAuth%202.0-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://developers.google.com/identity)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<br>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+<div align="center">
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+# Timplato
 
-## Learning Laravel
+### Systems Integration Approach to E-Commerce for Filipino Kitchenware
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+A full-stack e-commerce platform developed using Laravel that integrates secure authentication, online payment processing, live customer support, and inventory management to provide Filipino households with a seamless kitchenware shopping experience.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+</div>
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+# Table of Contents
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- About The Project
+- Features
+- System Architecture
+- Workflow
+- Technologies
+- Project Structure
+- Installation
+- Configuration
+- Running the Application
+- Core Modules
+- Integration Architecture
+- Database Design
+- Design Highlights
+- Future Improvements
+- Author
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# About The Project
 
-## Contributing
+**Timplato** is a modern e-commerce platform designed to provide Filipino households with affordable, high-quality kitchenware through an intuitive online shopping experience.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+The platform enables customers to browse products, securely authenticate using Google OAuth, purchase items through PayMongo payment services, communicate with support using Tawk.to live chat, and track their orders in real time. Administrators can efficiently manage products, inventory, orders, customers, content, and analytics through a comprehensive dashboard.
 
-## Code of Conduct
+Built following a modular service-oriented architecture (SOA), Timplato demonstrates systems integration principles by combining multiple internal modules with trusted third-party services into a scalable and maintainable web application.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+# Features
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Customer Portal
 
-## License
+- User registration and authentication
+- Google OAuth login
+- Product catalog browsing
+- Product search and filtering
+- Wishlist management
+- Shopping cart
+- Secure checkout
+- Order tracking
+- Product reviews and ratings
+- Customer support
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Admin Dashboard
+
+- Product management
+- Inventory management
+- Order management
+- User management
+- Sales analytics
+- Content Management System (CMS)
+- Notification management
+- Audit trail
+- Site configuration
+
+## Third-Party Integrations
+
+- Google OAuth Authentication
+- PayMongo Payment Gateway
+- Tawk.to Live Chat
+- Responsive Bootstrap interface
+
+---
+
+# System Architecture
+
+```text
+                 Customer / Admin
+                        │
+                        ▼
+                Laravel Web Application
+                        │
+        ┌───────────────┼────────────────┐
+        ▼               ▼                ▼
+     MySQL        Google OAuth      PayMongo
+   Database        Authentication    Payments
+        │                               │
+        └───────────────┬───────────────┘
+                        ▼
+                  Business Logic
+                        │
+                        ▼
+               Orders • Products
+             Inventory • Users
+                        │
+                        ▼
+                 Admin Dashboard
+```
+
+---
+
+# Workflow
+
+1. Users register or log in using Google OAuth or traditional authentication.
+2. Customers browse products and search the catalog.
+3. Products are added to the shopping cart.
+4. Checkout is completed using PayMongo.
+5. Payment confirmation updates order status.
+6. Customers track orders and leave reviews.
+7. Administrators manage inventory, products, orders, and reports.
+
+---
+
+# Technologies
+
+## Frontend
+
+- HTML5
+- CSS3
+- JavaScript
+- Bootstrap 5
+
+## Backend
+
+- Laravel 12
+- PHP 8.2
+- Blade Templates
+- Eloquent ORM
+
+## Database
+
+- MySQL
+
+## Authentication
+
+- Laravel Authentication
+- Laravel Socialite
+- Google OAuth 2.0
+
+## Payment Gateway
+
+- PayMongo API
+
+## Customer Support
+
+- Tawk.to API
+
+## Deployment
+
+- Apache / Nginx
+- Composer
+
+---
+
+# Project Structure
+
+```text
+timplato/
+
+├── app/
+├── bootstrap/
+├── config/
+├── database/
+│   ├── migrations/
+│   └── seeders/
+│
+├── public/
+├── resources/
+│   ├── css/
+│   ├── js/
+│   ├── views/
+│
+├── routes/
+│   ├── web.php
+│   └── api.php
+│
+├── storage/
+├── tests/
+├── artisan
+├── composer.json
+├── package.json
+├── .env
+└── README.md
+```
+
+---
+
+# Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/yourusername/timplato.git
+```
+
+```bash
+cd timplato
+```
+
+Install PHP dependencies
+
+```bash
+composer install
+```
+
+Install frontend dependencies
+
+```bash
+npm install
+```
+
+Create the environment file
+
+```bash
+cp .env.example .env
+```
+
+Generate application key
+
+```bash
+php artisan key:generate
+```
+
+Run database migrations
+
+```bash
+php artisan migrate --seed
+```
+
+Compile frontend assets
+
+```bash
+npm run build
+```
+
+---
+
+# Configuration
+
+Configure the following values in `.env`
+
+```env
+APP_NAME=Timplato
+
+APP_URL=http://localhost
+
+DB_CONNECTION=mysql
+DB_HOST=
+DB_PORT=
+DB_DATABASE=
+DB_USERNAME=
+DB_PASSWORD=
+
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=
+
+PAYMONGO_SECRET_KEY=
+PAYMONGO_PUBLIC_KEY=
+
+MAIL_MAILER=
+
+TAWKTO_PROPERTY_ID=
+TAWKTO_WIDGET_ID=
+```
+
+---
+
+# Running the Application
+
+Start Laravel
+
+```bash
+php artisan serve
+```
+
+Start Vite
+
+```bash
+npm run dev
+```
+
+Visit
+
+```text
+http://localhost:8000
+```
+
+---
+
+# Core Modules
+
+## Customer Modules
+
+- User Management
+- Product Catalog & Search
+- Wishlist
+- Shopping Cart
+- Checkout
+- Order History
+- Product Reviews
+- Customer Support
+
+## Administrative Modules
+
+- Product Management
+- Inventory Management
+- Order Management
+- User Management
+- Sales & Analytics
+- Content Management System
+- Notification Management
+- Audit Trail
+- Settings & Configuration
+
+---
+
+# Integration Architecture
+
+## Google OAuth
+
+Provides secure third-party authentication using OAuth 2.0 and Laravel Socialite.
+
+## PayMongo
+
+Processes online payments through cards and GCash while securely handling payment verification using webhooks.
+
+## Tawk.to
+
+Provides real-time customer support through embedded live chat.
+
+## MySQL
+
+Stores all persistent application data including products, orders, users, inventory, payments, and audit logs.
+
+---
+
+# Database Design
+
+The application follows a normalized relational database structure (Third Normal Form) consisting of over twenty interconnected entities.
+
+Core entities include:
+
+- Users
+- Products
+- Categories
+- Orders
+- Order Items
+- Payments
+- Reviews
+- Wishlists
+- Notifications
+- Inventory
+- Support Tickets
+- Admin Logs
+- CMS Pages
+- Banners
+- Settings
+
+The database is accessed using Laravel Eloquent ORM, ensuring maintainable, object-oriented data operations while preserving referential integrity through foreign key constraints.
+
+---
+
+# Design Highlights
+
+## Service-Oriented Architecture
+
+The system is organized into modular services that separate customer operations, administrative functionality, authentication, payment processing, and content management.
+
+---
+
+## Secure Authentication
+
+Authentication combines Laravel's built-in authentication with Google OAuth to provide secure and convenient account access.
+
+---
+
+## Payment Integration
+
+PayMongo enables PCI-compliant payment processing while keeping sensitive financial information outside the application's infrastructure.
+
+---
+
+## Modular Administration
+
+A centralized dashboard allows administrators to manage inventory, products, users, orders, reports, and website content independently.
+
+---
+
+## Real-Time Customer Experience
+
+Customers receive live updates through notifications, order tracking, and integrated live chat support.
+
+---
+
+## Scalability
+
+The modular architecture allows future integration with mobile applications, additional payment gateways, loyalty programs, and marketplace features.
+
+---
+
+# Future Improvements
+
+- Mobile application
+- AI-powered product recommendations
+- Loyalty and rewards program
+- Supplier management portal
+- Multi-vendor marketplace
+- Real-time inventory synchronization
+- Docker deployment
+- Kubernetes orchestration
+- Recommendation engine
+- Business intelligence dashboard
+
+---
+
+# Author
+
+**Ralph Jayrell Gacusan**
+
+Backend Developer • Full Stack Developer • Data & AI Enthusiast
+
+GitHub
+
+https://github.com/ralphgacusan
+
+---
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
