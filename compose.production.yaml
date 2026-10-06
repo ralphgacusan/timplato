@@ -1,0 +1,11 @@
+﻿services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: timplato:production
+    env_file:
+      - .env.production
+    ports:
+      - "8081:80"
+    restart: unless-stopped
