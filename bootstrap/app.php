@@ -12,14 +12,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // ✅ Global middleware
+
+        // Trust Render's reverse proxy so Laravel detects HTTPS correctly
+        $middleware->trustProxies(at: '*');
+
+        // Global middleware
         $middleware->append([
             \Illuminate\Http\Middleware\HandleCors::class,
             \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
             \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         ]);
 
-        // ✅ Web middleware group
+        // Web middleware group
         $middleware->appendToGroup('web', [
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
@@ -27,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 
-        // ✅ Middleware aliases (this replaces Kernel::$routeMiddleware)
+        // Middleware aliases
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
