@@ -77,7 +77,8 @@ RUN apt-get update && apt-get install -y \
         gd \
         intl \
         zip \
-    && a2enmod rewrite \
+    && a2dismod mpm_event mpm_worker \
+    && a2enmod mpm_prefork rewrite \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html
@@ -88,9 +89,13 @@ COPY . .
 
 COPY --from=frontend /app/public/build ./public/build
 
-RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+# Apache should serve Laravel's public directory
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' \
+    /etc/apache2/sites-available/000-default.conf
 
-RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+RUN sed -i \
+    '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' \
+    /etc/apache2/apache2.conf
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
