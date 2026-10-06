@@ -32,7 +32,12 @@ WORKDIR /app
 
 COPY composer.json composer.lock ./
 
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader \
+    --no-scripts
 
 
 # =========================
@@ -79,13 +84,18 @@ RUN apt-get update && apt-get install -y \
         zip \
     && rm -rf /var/lib/apt/lists/*
 
+
 # =========================
 # Apache MPM configuration
 # =========================
-RUN a2dismod mpm_event mpm_worker mpm_prefork || true; \
-    a2enmod mpm_prefork rewrite; \
-    echo "Enabled Apache MPM modules:"; \
-    apache2ctl -M 2>/dev/null | grep mpm
+RUN rm -f \
+        /etc/apache2/mods-enabled/mpm_*.load \
+        /etc/apache2/mods-enabled/mpm_*.conf \
+    && a2enmod mpm_prefork \
+    && a2enmod rewrite \
+    && echo "Enabled Apache MPM modules:" \
+    && apache2ctl -M 2>/dev/null | grep mpm
+
 
 WORKDIR /var/www/html
 
@@ -95,19 +105,36 @@ COPY . .
 
 COPY --from=frontend /app/public/build ./public/build
 
+
+# =========================
+# Apache configuration
+# =========================
+
 # Apache should serve Laravel's public directory
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' \
     /etc/apache2/sites-available/000-default.conf
 
+# Allow Laravel .htaccess overrides
 RUN sed -i \
     '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' \
     /etc/apache2/apache2.conf
 
+
+# =========================
+# Laravel permissions
+# =========================
+
 RUN chown -R www-data:www-data storage bootstrap/cache
+
+
+# =========================
+# Laravel entrypoint
+# =========================
 
 COPY docker/entrypoint.sh /usr/local/bin/laravel-entrypoint
 
 RUN chmod +x /usr/local/bin/laravel-entrypoint
+
 
 EXPOSE 80
 
