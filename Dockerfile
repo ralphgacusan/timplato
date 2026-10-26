@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install \
         pdo_mysql \
         pdo_sqlite \
-        sqlite3 \
         mbstring \
         exif \
         pcntl \
@@ -27,6 +26,7 @@ RUN apt-get update && apt-get install -y \
         gd \
         intl \
         zip \
+    && php -r 'exit(extension_loaded("sqlite3") && method_exists("SQLite3", "setAuthorizer") ? 0 : 1);' \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -82,7 +82,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install \
         pdo_mysql \
         pdo_sqlite \
-        sqlite3 \
         mbstring \
         exif \
         pcntl \
@@ -90,6 +89,7 @@ RUN apt-get update && apt-get install -y \
         gd \
         intl \
         zip \
+    && php -r 'exit(extension_loaded("sqlite3") && method_exists("SQLite3", "setAuthorizer") ? 0 : 1);' \
     && rm -rf /var/lib/apt/lists/*
 
 
