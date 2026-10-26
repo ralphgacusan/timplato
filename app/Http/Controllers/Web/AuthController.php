@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Models\Notification;
+use App\Services\LoginProtection;
 
 
 class AuthController extends Controller
@@ -26,8 +27,14 @@ class AuthController extends Controller
     }
 
     // Show Sign in Page
-    public function signinPage(){
-        return view('auth.sign-in');
+    public function signinPage(Request $request, LoginProtection $loginProtection){
+        $email = $request->session()->get('login_email');
+        $email = is_string($email) ? $email : null;
+
+        return response()->view('auth.sign-in', [
+            'loginEmail' => $email,
+            'loginProtection' => $loginProtection->state($email, $request->ip()),
+        ])->header('Cache-Control', 'no-store, private');
     }
 
 
@@ -43,7 +50,7 @@ class AuthController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $googleUser = Socialite::driver('google')->user();
 
             // Find existing user or create new
             $user = User::firstOrCreate(
@@ -77,6 +84,7 @@ class AuthController extends Controller
 
             // Log the user in
             Auth::login($user);
+            request()->session()->regenerate();
 
             // Redirect based on role (same as signin logic)
             if ($user->role === 'admin') {
@@ -136,13 +144,9 @@ class AuthController extends Controller
             'password' => [
                 'required',
                 'string',
-                'min:8',
+                'min:15',
                 'max:64', // Prevent crazy long passwords
                 'confirmed',
-            ],
-            'role' => [
-                'required',
-                'in:user,admin',
             ],
             'gender' => [
                 'nullable',
@@ -174,31 +178,89 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->back()->withErrors($validator)->withInput($request->only([
+                'first_name', 'middle_name', 'last_name', 'email', 'phone', 'gender', 'date_of_birth',
+            ]));
         }
 
         $validated = $validator->validated();
 
+        $validated['role'] = 'user';
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
 
         Auth::login($user);
+        $request->session()->regenerate();
 
         return redirect()->route('customer.home')->with('success', 'Registration successful! Welcome, ' . $user->first_name . '!');
     }
 
     // Sign in
-    public function signin(Request $request)
+    public function signin(Request $request, LoginProtection $loginProtection)
     {
-        // Validate the login credentials
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string|min:8',
-        ]);
+        // Auth::attempt() rotates the session on success; keep the guest cart id first.
+        $oldSessionId = $request->session()->getId();
+        $emailInput = $request->input('email');
+        $email = is_string($emailInput) ? trim($emailInput) : null;
+        $validationErrors = null;
 
-        // Attempt login
-        if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
+        $attempt = $loginProtection->attempt($emailInput, $request->ip(), function () use ($request, &$validationErrors) {
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|string|email|max:255',
+                'password' => 'required|string|max:4096',
+            ]);
+
+            if ($validator->fails()) {
+                $validationErrors = $validator->errors();
+
+                return false;
+            }
+
+            $validated = $validator->validated();
+
+            return Auth::attempt([
+                'email' => $validated['email'],
+                'password' => $validated['password'],
+            ]);
+        });
+
+        $state = $attempt['loginProtection'];
+
+        if ($email !== null && $email !== '') {
+            $request->session()->put('login_email', $email);
+        } else {
+            $request->session()->forget('login_email');
+        }
+
+        if ($attempt['blocked']) {
+            $message = $state['reason'] === 'busy'
+                ? 'Sign-in is busy. Please try again shortly.'
+                : 'Too many sign-in attempts. Please try again after the lockout ends.';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $message,
+                    'loginProtection' => $state,
+                ], 429)->header('Cache-Control', 'no-store, private')->header('Retry-After', (string) $state['retry_after'])
+                    ->header('X-RateLimit-Remaining', '0');
+            }
+
+            $page = view('auth.sign-in', [
+                'loginEmail' => $email,
+                'loginProtection' => $state,
+                'loginError' => $message,
+            ]);
+            $page->withErrors(['email' => $message]);
+
+            return response($page, 429)
+                ->header('Cache-Control', 'no-store, private')
+                ->header('Retry-After', (string) $state['retry_after'])
+                ->header('X-RateLimit-Remaining', '0');
+        }
+
+        if ($attempt['success']) {
+            $request->session()->forget('login_email');
 
             // Regenerate session to prevent fixation
             $request->session()->regenerate();
@@ -240,7 +302,6 @@ class AuthController extends Controller
                 return redirect()->route('admin.dashboard')->with('success', 'Welcome Admin ' . $user->first_name . '!');
             } else {
                 // Merge guest cart for regular users
-                $oldSessionId = $request->session()->getId();
                 $this->mergeGuestCart($oldSessionId);
 
                 return redirect()->intended(route('customer.home'))
@@ -248,10 +309,25 @@ class AuthController extends Controller
             }
         }
 
-        // Authentication failed
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+        $errors = $validationErrors ?? ['email' => 'Invalid credentials.'];
+        $remaining = (string) $state['remaining'];
+
+        if ($request->expectsJson()) {
+            $responseErrors = $validationErrors instanceof \Illuminate\Support\MessageBag
+                ? $validationErrors->messages()
+                : ['email' => ['Invalid credentials.']];
+
+            return response()->json([
+                'message' => 'Sign-in failed.',
+                'errors' => $responseErrors,
+                'loginProtection' => $state,
+            ], 422)->header('Cache-Control', 'no-store, private')->header('X-RateLimit-Remaining', $remaining);
+        }
+
+        return back()->withErrors($errors)
+            ->withInput($email === null || $email === '' ? [] : ['email' => $email])
+            ->header('Cache-Control', 'no-store, private')
+            ->header('X-RateLimit-Remaining', $remaining);
     }
 
 

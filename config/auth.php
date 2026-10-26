@@ -112,4 +112,11 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    'login' => [
+        'max_attempts' => env('AUTH_LOGIN_MAX_ATTEMPTS', 5),
+        'window_seconds' => env('AUTH_LOGIN_WINDOW_SECONDS', 900),
+        'lockout_seconds' => env('AUTH_LOGIN_LOCKOUT_SECONDS', 900),
+        'ip_max_attempts' => env('AUTH_LOGIN_IP_MAX_ATTEMPTS', 20),
+    ],
+
 ];

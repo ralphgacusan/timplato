@@ -1,155 +1,98 @@
 @extends('security-testing.layout')
 
-@section('title', 'Log in - Timplato')
+@section('title', !empty($signup) ? 'Create account | Timplato' : 'Sign in | Timplato')
 
 @section('content')
-    <section class="signin-hero" style="background-image: url('{{ asset('Assets/timplatoLoginBanner.png') }}')">
-        <div class="loginContainer">
-            <form class="loginForm" action="{{ route('security-testing.signin.submit') }}" method="POST">
-                @csrf
-                <h1 class="formTitle">Login</h1>
-                <p class="lab-fixture-note">Demo account: demo@example.test / LabPassword123!</p>
-                <div class="formGroup">
-                    <label class="formLabel" for="email">Email</label>
-                    <input class="formInput" id="email" name="email" type="text" placeholder="Enter your email"
-                        value="{{ $email ?? '' }}">
-                </div>
-                <div class="formGroup">
-                    <label class="formLabel" for="password">Password</label>
-                    <input class="formInput" id="password" name="password" type="password"
-                        placeholder="Enter your password">
-                </div>
-                <button class="formButton" type="submit">Login</button>
-            </form>
+    @php
+        $isSignup = !empty($signup);
+        $emailValue = $email ?? old('email', '');
+    @endphp
+
+    <section class="auth-hero" style="background-image: linear-gradient(90deg, rgba(31, 42, 69, .48), rgba(31, 42, 69, .08)), url('{{ asset('Assets/timplatoLoginBanner.png') }}')">
+        <div class="auth-hero__copy">
+            <p class="eyebrow">Made for the heart of your home</p>
+            <h1>Good days start in the kitchen.</h1>
+            <p>Discover thoughtful kitchen essentials made for the meals, rituals, and people you love.</p>
         </div>
-    </section>
 
-    @isset($query)
-        <style>
-            .login-result-dialog {
-                width: min(440px, calc(100% - 32px));
-                padding: 32px;
-                border: 0;
-                border-radius: 18px;
-                color: #333;
-                text-align: center;
-                box-shadow: 0 12px 40px rgba(0, 0, 0, .24);
-            }
+        <section class="auth-card" aria-labelledby="auth-title">
+            <a class="auth-card__back" href="{{ route('security-testing.products') }}">← Back to the shop</a>
+            <p class="eyebrow">{{ $isSignup ? 'Join the Timplato table' : 'Welcome back' }}</p>
+            <h2 id="auth-title">{{ $isSignup ? 'Create your account' : 'Sign in to Timplato' }}</h2>
+            <p class="auth-card__intro">{{ $isSignup ? 'Create a lab account to explore the training storefront.' : 'Pick up where you left off and find something lovely for your kitchen.' }}</p>
+            @unless ($isSignup)
+                <p class="demo-credentials">Demo account: <strong>demo@example.test</strong><br>Password: <strong>LabPassword123!</strong></p>
+            @endunless
 
-            .login-result-dialog::backdrop {
-                background: rgba(32, 24, 48, .62);
-            }
+            @if (isset($message) || isset($query) || session()->has('status') || session()->has('feedback'))
+                <div class="notice {{ !empty($identity) || session()->has('status') || session()->has('feedback') ? 'notice--success' : 'notice--info' }}" role="status" aria-live="polite" id="auth-feedback">
+                    @if (isset($message))
+                        {{ $message }}
+                    @elseif (session()->has('feedback'))
+                        {{ session('feedback') }}
+                    @elseif (session()->has('status'))
+                        {{ session('status') }}
+                    @elseif ($queryError ?? false)
+                        Sign-in query failed. Open the lab query details below for the database response.
+                    @elseif (!empty($identity))
+                        Login successful. Welcome{{ !empty($identity['name']) ? ', '.$identity['name'] : '' }}.
+                    @else
+                        Invalid credentials. Please check your email and password.
+                    @endif
+                </div>
+            @endif
 
-            .login-result-dialog__indicator {
-                display: grid;
-                width: 56px;
-                height: 56px;
-                margin: 0 auto 16px;
-                place-items: center;
-                border-radius: 50%;
-                color: #fff;
-                font-size: 1.75rem;
-                font-weight: 700;
-            }
-
-            .login-result-dialog--success .login-result-dialog__indicator {
-                background: #198754;
-            }
-
-            .login-result-dialog--error .login-result-dialog__indicator {
-                background: #b42318;
-            }
-
-            .login-result-dialog h2 {
-                margin: 0 0 10px;
-                color: #4b3c7a;
-                font-size: 1.5rem;
-            }
-
-            .login-result-dialog p {
-                margin: 0;
-                line-height: 1.5;
-            }
-
-            .login-result-dialog form {
-                margin-top: 24px;
-            }
-
-            .login-result-dialog__button {
-                min-width: 120px;
-                padding: 10px 20px;
-                border: 0;
-                border-radius: 6px;
-                background: #7c5fe6;
-                color: #fff;
-                font: inherit;
-                font-weight: 600;
-                cursor: pointer;
-            }
-
-            .login-result-dialog__button:hover {
-                background: #5a3bb3;
-            }
-
-            .login-result-dialog__button:focus-visible {
-                outline: 3px solid #c9bbff;
-                outline-offset: 3px;
-            }
-        </style>
-
-        <dialog id="login-result-dialog"
-            class="login-result-dialog {{ $identity && ! $queryError ? 'login-result-dialog--success' : 'login-result-dialog--error' }}"
-            aria-labelledby="login-result-title" aria-describedby="login-result-description">
-            <div class="login-result-dialog__indicator" aria-hidden="true">
-                {{ $identity && ! $queryError ? '✓' : '!' }}
-            </div>
-
-            <h2 id="login-result-title">
-                @if ($queryError)
-                    Unable to log in
-                @elseif ($identity)
-                    Login successful
-                @else
-                    Login failed
+            <form class="auth-form" action="{{ $isSignup ? route('security-testing.signup.submit') : route('security-testing.signin.submit') }}" method="POST">
+                @csrf
+                @if ($isSignup)
+                    <div class="field">
+                        <label for="name">Full name</label>
+                        <input id="name" name="name" type="text" autocomplete="name" placeholder="Your name" value="{{ old('name', '') }}" required>
+                        @error('name') <span class="field-error">{{ $message }}</span> @enderror
+                    </div>
                 @endif
-            </h2>
 
-            <p id="login-result-description">
-                @if ($queryError)
-                    The sign-in request could not be completed. See the diagnostic details below.
-                @elseif ($identity)
-                    Your credentials matched an account.
-                @else
-                    We couldn't find an account matching that email and password.
+                <div class="field">
+                    <label for="email">Email address</label>
+                    <input id="email" name="email" type="text" autocomplete="email" placeholder="you@example.com" value="{{ $emailValue }}" required>
+                    @error('email') <span class="field-error">{{ $message }}</span> @enderror
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="{{ $isSignup ? 'new-password' : 'current-password' }}" placeholder="Enter your password" required>
+                    @error('password') <span class="field-error">{{ $message }}</span> @enderror
+                </div>
+                @if ($isSignup)
+                    <div class="field">
+                        <label for="password_confirmation">Confirm password</label>
+                        <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Enter your password again">
+                    </div>
                 @endif
+
+                <button class="button button--primary button--wide" type="submit" id="{{ $isSignup ? 'signup-submit' : 'signin-submit' }}">
+                    {{ $isSignup ? 'Create account' : 'Sign in' }}
+                </button>
+            </form>
+
+            <p class="auth-switch">
+                {{ $isSignup ? 'Already have an account?' : 'New to Timplato?' }}
+                <a href="{{ $isSignup ? route('security-testing.signin') : route('security-testing.signup') }}">
+                    {{ $isSignup ? 'Sign in' : 'Create an account' }}
+                </a>
             </p>
 
-            <form method="dialog">
-                <button class="login-result-dialog__button" type="submit" autofocus>Okay</button>
-            </form>
-        </dialog>
-
-        <script>
-            const loginResultDialog = document.getElementById('login-result-dialog');
-            if (loginResultDialog && !loginResultDialog.open) {
-                loginResultDialog.showModal();
-            }
-        </script>
-
-        <section class="lab-panel" aria-live="polite">
-            <h2>Sign-in result</h2>
-            <p>Query executed:</p>
-            <pre><code>{{ $query }}</code></pre>
-
-            @if ($queryError)
-                <p role="alert">{{ $queryError }}</p>
-            @elseif ($identity)
-                <p>Matched account: #{{ $identity['id'] }} — {{ $identity['email'] }}</p>
-            @else
-                <p>No account matched this query.</p>
+            @if (isset($query) || ($queryError ?? false))
+                <details class="lab-details" id="query-details">
+                    <summary>{{ $isSignup ? 'View sign-up query details' : 'View sign-in query details' }}</summary>
+                    <p>{{ $isSignup ? 'Training feedback from the sign-up request:' : 'Training feedback from the sign-in request:' }}</p>
+                    @isset($query)
+                        <pre><code>{{ $query }}</code></pre>
+                    @endisset
+                    @if ($queryError ?? false)
+                        <p class="field-error" role="alert">{{ $queryError }}</p>
+                    @endif
+                </details>
             @endif
         </section>
-    @endisset
-
-    @include('security-testing.database')
+    </section>
 @endsection

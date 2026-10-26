@@ -18,6 +18,7 @@
 /public/storage
 /storage/*.key
 /storage/framework/security-testing.sqlite*
+/storage/framework/security-testing-original.sqlite*
 /storage/pail
 /vendor
 Homestead.json

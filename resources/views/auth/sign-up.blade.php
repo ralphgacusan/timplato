@@ -114,8 +114,9 @@
                         </div>
                         <div class="formGroup" style="flex: 1;">
                             <label for="password" class="formLabel">Password</label>
-                            <input type="password" id="password" name="password" class="formInput"
-                                placeholder="Enter your password" required>
+                            <input type="password" id="password" name="password" class="formInput" minlength="15" maxlength="64" autocomplete="new-password"
+                                placeholder="Use at least 15 characters" required aria-describedby="password-guidance">
+                            <small id="password-guidance" style="color:#555;font-size:.75rem;">Use 15 to 64 characters. A long, unique passphrase works well.</small>
                             @error('password')
                                 <span class="error-message"
                                     style="color:red; font-size:0.7rem;">{{ $message }}</span>
@@ -123,7 +124,7 @@
                         </div>
                         <div class="formGroup" style="flex: 1;">
                             <label for="repassword" class="formLabel">Confirm Password</label>
-                            <input type="password" id="repassword" name="password_confirmation" class="formInput"
+                            <input type="password" id="repassword" name="password_confirmation" class="formInput" minlength="15" maxlength="64" autocomplete="new-password"
                                 placeholder="Re-enter your password" required>
                             @error('password')
                                 <span class="error-message"

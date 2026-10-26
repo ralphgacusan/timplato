@@ -123,6 +123,7 @@
     <!-- Reviews Section -->
     <div class="reviews-section">
         <h3>Customer Reviews ({{ $totalReviews }})</h3>
+        <p class="text-muted small mb-3">Reviews are displayed as plain text. HTML, styles, and scripts are not executed.</p>
 
         @if ($totalReviews > 0)
             <div class="rating-summary mb-4">

@@ -479,82 +479,82 @@ public function showOrderManagement(Request $request)
         switch ($status) {
     case 'placed':
         $title = 'Order Placed Successfully';
-        $message = "Your order <b>#{$orderNumber}</b> has been placed successfully. Thank you for shopping with us!";
+        $message = "Your order #{$orderNumber} has been placed successfully. Thank you for shopping with us!";
         break;
         
     case 'confirmed':
         $title = 'Order Confirmed';
-        $message = "Your order <b>#{$orderNumber}</b> has been confirmed by the seller.";
+        $message = "Your order #{$orderNumber} has been confirmed by the seller.";
         break;
 
     case 'processing':
         $title = 'Order Processing';
-        $message = "Your order <b>#{$orderNumber}</b> is now being processed.";
+        $message = "Your order #{$orderNumber} is now being processed.";
         break;
 
     case 'shipped':
         $title = 'Order Shipped';
-        $message = "Your order <b>#{$orderNumber}</b> has been shipped and is on the way.";
+        $message = "Your order #{$orderNumber} has been shipped and is on the way.";
         break;
 
     case 'delivered':
         $title = 'Order Delivered';
-        $message = "Your order <b>#{$orderNumber}</b> has been delivered.";
+        $message = "Your order #{$orderNumber} has been delivered.";
         break;
 
     case 'completed':
         $title = 'Order Completed';
-        $message = "Your order <b>#{$orderNumber}</b> has been completed successfully. Thank you for shopping with us!";
+        $message = "Your order #{$orderNumber} has been completed successfully. Thank you for shopping with us!";
         break;
 
     case 'cancel_requested':
         $title = 'Cancel Request Sent';
-        $message = "Your cancellation request for order <b>#{$orderNumber}</b> has been submitted.";
+        $message = "Your cancellation request for order #{$orderNumber} has been submitted.";
         break;
 
     case 'cancel_rejected':
         $title = 'Cancel Request Rejected';
-        $message = "Your cancellation request for order <b>#{$orderNumber}</b> has been rejected by the seller.";
+        $message = "Your cancellation request for order #{$orderNumber} has been rejected by the seller.";
         break;
 
     case 'cancelled':
         $title = 'Order Cancelled';
-        $message = "Your order <b>#{$orderNumber}</b> has been cancelled.";
+        $message = "Your order #{$orderNumber} has been cancelled.";
         break;
 
     case 'return_requested':
         $title = 'Return Request Sent';
-        $message = "Your return request for order <b>#{$orderNumber}</b> has been submitted and is awaiting review.";
+        $message = "Your return request for order #{$orderNumber} has been submitted and is awaiting review.";
         break;
 
     case 'return_approved':
         $title = 'Return Request Approved';
-        $message = "Your return request for order <b>#{$orderNumber}</b> has been approved. Please follow the return instructions.";
+        $message = "Your return request for order #{$orderNumber} has been approved. Please follow the return instructions.";
         break;
 
     case 'returned':
         $title = 'Order Returned';
-        $message = "Your return for order <b>#{$orderNumber}</b> has been processed successfully.";
+        $message = "Your return for order #{$orderNumber} has been processed successfully.";
         break;
 
     case 'refund_requested':
         $title = 'Refund Request Sent';
-        $message = "Your refund request for order <b>#{$orderNumber}</b> has been submitted and is awaiting review.";
+        $message = "Your refund request for order #{$orderNumber} has been submitted and is awaiting review.";
         break;
 
     case 'refund_approved':
         $title = 'Refund Request Approved';
-        $message = "Your refund request for order <b>#{$orderNumber}</b> has been approved. The refund will be processed shortly.";
+        $message = "Your refund request for order #{$orderNumber} has been approved. The refund will be processed shortly.";
         break;
 
     case 'refunded':
         $title = 'Order Refunded';
-        $message = "Your order <b>#{$orderNumber}</b> has been refunded successfully.";
+        $message = "Your order #{$orderNumber} has been refunded successfully.";
         break;
 
     default:
         $title = 'Order Status Updated';
-        $message = "Your order <b>#{$orderNumber}</b> status has been updated.";
+        $message = "Your order #{$orderNumber} status has been updated.";
         break;
 }
 

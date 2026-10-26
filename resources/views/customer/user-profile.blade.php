@@ -463,7 +463,7 @@
                                             @endif
 
                                             <div class="notification-info">
-                                                <div class="notification-desc">{!! $notification->message !!}</div>
+                                                <div class="notification-desc">{{ str_ireplace(['<b>', '</b>'], '', $notification->message) }}</div>
                                                 <div class="notification-date">
                                                     {{ $notification->created_at->format('M d, Y h:i A') }}</div>
                                             </div>

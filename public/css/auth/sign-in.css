@@ -220,3 +220,22 @@
     line-height: 1;
     pointer-events: none;
 }
+
+.error-message { color: #a82129; font-size: .8rem; line-height: 1.4; }
+.signin-protection { padding: 12px 14px; border: 1px solid #dcd7ee; border-radius: 8px; background: #f6f4fc; color: #423665; font-size: .82rem; line-height: 1.45; }
+.signin-protection strong { display: block; font-size: .85rem; }
+.signin-protection p { margin: 5px 0 0; }
+.signin-protection-note { color: #646472; font-size: .76rem; line-height: 1.5; }
+.signin-protection--locked { background: #fff2ee; border-color: #efc3b9; color: #8a2d22; }
+.formButton:disabled { background: #777184; cursor: not-allowed; }
+.signin-lockout-dialog { width: min(460px, calc(100% - 32px)); padding: 30px; border: 0; border-radius: 18px; color: #303145; box-shadow: 0 20px 70px #1d17384d; text-align: center; }
+.signin-lockout-dialog::backdrop { background: #1d1738a6; }
+.signin-lockout-dialog h2 { margin: 14px 0; font-size: 1.45rem; color: #4b3c7a; }
+.signin-lockout-dialog p { font-size: .9rem; line-height: 1.6; }
+.signin-lockout-dialog .formButton { padding: 10px 24px; }
+.signin-lockout-symbol { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #fff0e9; color: #a84322; font-size: 1.75rem; font-weight: 700; }
+.signin-lockout-time { display: grid; gap: 7px; padding: 16px; border-radius: 10px; background: #f4f1fb; font-size: .85rem; }
+.signin-lockout-time time { color: #4b3c7a; font-weight: 700; }
+.signin-lockout-time small { color: #686175; }
+#signin-countdown { font-variant-numeric: tabular-nums; font-weight: 700; }
+@media (max-width: 480px) { .loginContainer { min-width: 0; width: calc(100% - 28px); padding: 24px; } .heroHeader { padding: 100px 0 32px; } .hero-section { height: auto; min-height: 100vh; } }

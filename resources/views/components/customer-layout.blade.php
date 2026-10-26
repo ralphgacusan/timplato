@@ -73,7 +73,7 @@
                                                         style="width:40px;height:40px;object-fit:cover;">
                                                 </div>
                                                 <div class="notification-info">
-                                                    <div class="notification-text">{!! $notification->message !!}</div>
+                                                    <div class="notification-text">{{ str_ireplace(['<b>', '</b>'], '', $notification->message) }}</div>
                                                     <div class="notification-date">
                                                         {{ $notification->created_at->format('M d, Y h:i A') }}
                                                     </div>
@@ -88,7 +88,7 @@
                                                     style="width:40px;height:40px;object-fit:cover;">
                                             </div>
                                             <div class="notification-info">
-                                                <div class="notification-text">{!! $notification->message !!}</div>
+                                                <div class="notification-text">{{ str_ireplace(['<b>', '</b>'], '', $notification->message) }}</div>
                                                 <div class="notification-date">
                                                     {{ $notification->created_at->format('M d, Y h:i A') }}
                                                 </div>
@@ -148,7 +148,7 @@
         @if (session('success'))
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
-                    showNotification(@json(session('success')), 'success');
+                    showNotification({{ \Illuminate\Support\Js::from(session('success')) }}, 'success');
                 });
             </script>
         @endif
@@ -156,14 +156,14 @@
         @if (session('error'))
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
-                    showNotification(@json(session('error')), 'error');
+                    showNotification({{ \Illuminate\Support\Js::from(session('error')) }}, 'error');
                 });
             </script>
         @endif
-        @if (request()->query('error'))
+        @if (is_string(request()->query('error')) && request()->query('error') !== '')
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
-                    showNotification(@json(request()->query('error')), 'error');
+                    showNotification({{ \Illuminate\Support\Js::from(request()->query('error')) }}, 'error');
                 });
             </script>
         @endif

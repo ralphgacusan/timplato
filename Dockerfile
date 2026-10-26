@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install \
         pdo_mysql \
         pdo_sqlite \
+        sqlite3 \
         mbstring \
         exif \
         pcntl \
@@ -81,6 +82,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install \
         pdo_mysql \
         pdo_sqlite \
+        sqlite3 \
         mbstring \
         exif \
         pcntl \

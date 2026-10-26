@@ -119,7 +119,7 @@ public function update(Request $request, $id)
             ? ($voucher->discount_value * 100) . '% off'
             : '₱' . number_format($voucher->discount_value, 2) . ' off';
 
-        $message = "New voucher <b>{$voucher->code}</b> available: {$discountText}. {$voucher->description}";
+        $message = "New voucher {$voucher->code} available: {$discountText}. {$voucher->description}";
 
         Notification::create([
             'user_id' => $user->id,

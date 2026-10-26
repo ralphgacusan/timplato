@@ -73,12 +73,30 @@ if (searchToggle && searchBar) {
 
 function showNotification(message, type = 'success', duration = 6000) {
     const container = document.getElementById('notification-container');
+    if (!container) return;
+
+    const notificationTypes = ['success', 'error', 'info', 'warning'];
+    const safeType = notificationTypes.includes(type) ? type : 'success';
     const notif = document.createElement('div');
-    notif.className = `notification ${type}`;
-    notif.innerHTML = `
-                <span>${message}</span>
-                <span class="close-btn" onclick="this.parentElement.remove()">×</span>
-            `;
+    notif.className = `notification ${safeType}`;
+
+    const messageText = document.createElement('span');
+    messageText.textContent = String(message ?? '');
+
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'close-btn';
+    closeButton.setAttribute('aria-label', 'Close notification');
+    closeButton.textContent = '×';
+    closeButton.style.background = 'transparent';
+    closeButton.style.border = '0';
+    closeButton.style.color = 'inherit';
+    closeButton.style.font = 'inherit';
+    closeButton.style.fontWeight = 'bold';
+    closeButton.style.cursor = 'pointer';
+    closeButton.addEventListener('click', () => notif.remove());
+
+    notif.append(messageText, closeButton);
 
     container.appendChild(notif);
 
@@ -90,6 +108,7 @@ function showNotification(message, type = 'success', duration = 6000) {
 document.addEventListener('DOMContentLoaded', function () {
     const bell = document.getElementById('notificationToggle');
     const modal = document.getElementById('notificationModal');
+    if (!bell || !modal) return;
 
     function toggleModal() {
         modal.classList.toggle('show');
